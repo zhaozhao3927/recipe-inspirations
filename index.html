@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Recipe Inspirations</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream:    #faf6f0;
+    --parchment:#f2ead8;
+    --warm:     #e8d5b7;
+    --terracotta: #c4714a;
+    --terra-dk: #a05535;
+    --sage:     #7a9e7e;
+    --sage-lt:  #c8ddc9;
+    --ink:      #2e2212;
+    --ink-md:   #5a4832;
+    --ink-lt:   #8a7460;
+    --border:   #d9c9aa;
+    --white:    #ffffff;
+    --shadow:   0 2px 12px rgba(46,34,18,.10);
+    --shadow-lg:0 6px 28px rgba(46,34,18,.16);
+    --radius:   14px;
+    --radius-sm:8px;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--white);
+    border-bottom: 2px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.25rem; font-weight: 700; color: var(--terracotta);
+  }
+  .logo-icon { font-size: 1.6rem; }
+  .logo-sub { font-size: 0.75rem; font-weight: 400; color: var(--ink-lt); letter-spacing: .05em; display: block; margin-top:-2px; }
+
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-icon {
+    background: none; border: none; cursor: pointer;
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: var(--ink-lt);
+    transition: background .15s;
+  }
+  .btn-icon:hover { background: var(--parchment); color: var(--ink); }
+
+  /* ── Nav Tabs ── */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 24px;
+    gap: 4px;
+  }
+  .tab {
+    padding: 12px 20px;
+    border: none; background: none; cursor: pointer;
+    font-size: .92rem; font-weight: 500; color: var(--ink-lt);
+    border-bottom: 3px solid transparent;
+    transition: all .15s;
+    margin-bottom: -1px;
+  }
+  .tab.active { color: var(--terracotta); border-bottom-color: var(--terracotta); }
+  .tab:hover:not(.active) { color: var(--ink); background: var(--parchment); }
+  .tab-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--sage-lt); color: var(--sage);
+    border-radius: 20px; font-size: .72rem; font-weight: 700;
+    padding: 1px 7px; margin-left: 6px;
+  }
+
+  /* ── Main Layout ── */
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+  /* ── View panels ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ══════════════════════════════════
+     ADD INSPIRATION VIEW
+  ══════════════════════════════════ */
+  .add-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 700px) { .add-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 1rem; font-weight: 700; color: var(--ink);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .card-title-icon { font-size: 1.15rem; }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--parchment);
+    position: relative;
+    min-height: 200px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--terracotta);
+    background: #fdeee6;
+  }
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 2.4rem; }
+  .upload-hint { color: var(--ink-lt); font-size: .88rem; }
+  .upload-hint strong { color: var(--terracotta); }
+
+  .preview-img {
+    width: 100%; border-radius: var(--radius-sm);
+    display: block; object-fit: cover; max-height: 280px;
+  }
+  .preview-wrap { position: relative; }
+  .preview-remove {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,.55); color: #fff; border: none;
+    border-radius: 50%; width: 28px; height: 28px; cursor: pointer;
+    font-size: 1rem; display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .preview-remove:hover { background: rgba(196,113,74,.9); }
+
+  /* Form fields */
+  label { display: block; font-size: .85rem; font-weight: 600; color: var(--ink-md); margin-bottom: 5px; }
+  input[type=text], textarea, select {
+    width: 100%; padding: 10px 13px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: .92rem; color: var(--ink);
+    background: var(--white);
+    transition: border-color .15s;
+    font-family: inherit;
+  }
+  input[type=text]:focus, textarea:focus, select:focus {
+    outline: none; border-color: var(--terracotta);
+  }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+  .field { margin-bottom: 16px; }
+
+  /* Tags input */
+  .tags-wrap {
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--white); min-height: 44px;
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 7px 10px;
+    cursor: text; transition: border-color .15s;
+  }
+  .tags-wrap:focus-within { border-color: var(--terracotta); }
+  .tag-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--sage-lt); color: var(--sage);
+    border-radius: 20px; padding: 3px 10px; font-size: .8rem; font-weight: 600;
+  }
+  .tag-chip button {
+    background: none; border: none; cursor: pointer; color: var(--sage);
+    font-size: .85rem; line-height: 1; padding: 0;
+  }
+  .tag-chip button:hover { color: var(--terracotta); }
+  .tags-input {
+    border: none; outline: none; font-size: .88rem; color: var(--ink);
+    background: transparent; min-width: 100px; flex: 1; padding: 2px 0;
+  }
+  .tag-hint { font-size: .78rem; color: var(--ink-lt); margin-top: 4px; }
+
+  /* Category selector */
+  .category-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    padding: 5px 14px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--white);
+    font-size: .82rem; font-weight: 500; color: var(--ink-md);
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .pill:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .pill.selected { background: var(--terracotta); border-color: var(--terracotta); color: white; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: var(--radius-sm);
+    font-size: .92rem; font-weight: 600; cursor: pointer;
+    border: none; transition: all .15s; font-family: inherit;
+  }
+  .btn-primary { background: var(--terracotta); color: white; }
+  .btn-primary:hover { background: var(--terra-dk); }
+  .btn-primary:disabled { background: #d4b8a8; cursor: not-allowed; }
+  .btn-secondary {
+    background: var(--white); color: var(--ink-md);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--terracotta); color: var(--terracotta); background: #fdeee6; }
+  .btn-ai {
+    background: linear-gradient(135deg, #7c4dff 0%, #448aff 100%);
+    color: white;
+  }
+  .btn-ai:hover { opacity: .9; }
+  .btn-ai:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-sm { padding: 6px 14px; font-size: .82rem; }
+  .btn-danger { background: #fff0ee; color: #c0392b; border: 1.5px solid #f5c6c2; }
+  .btn-danger:hover { background: #fde8e5; }
+
+  .form-actions { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+
+  /* AI Analysis panel */
+  .ai-panel {
+    background: linear-gradient(135deg, #f5f0ff 0%, #eff6ff 100%);
+    border: 1.5px solid #c4b5fd;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 20px;
+    display: none;
+  }
+  .ai-panel.visible { display: block; }
+  .ai-panel-title {
+    font-size: .95rem; font-weight: 700; color: #5b21b6;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 7px;
+  }
+  .ai-section { margin-bottom: 14px; }
+  .ai-section-label {
+    font-size: .78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: #7c3aed; margin-bottom: 6px;
+  }
+  .ai-text { font-size: .88rem; color: var(--ink); line-height: 1.6; }
+  .ingredient-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ingredient-chip {
+    background: white; border: 1px solid #c4b5fd;
+    color: #5b21b6; border-radius: 20px;
+    padding: 3px 11px; font-size: .8rem; font-weight: 500;
+  }
+  .ai-loading {
+    display: flex; align-items: center; gap: 10px;
+    color: #5b21b6; font-size: .9rem; padding: 10px 0;
+  }
+  .spinner {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2.5px solid #c4b5fd;
+    border-top-color: #7c3aed;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ══════════════════════════════════
+     RECIPE BOOK VIEW
+  ══════════════════════════════════ */
+  .book-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+  }
+  .book-title { font-size: 1.5rem; font-weight: 700; color: var(--ink); }
+  .book-subtitle { font-size: .88rem; color: var(--ink-lt); margin-top: 2px; }
+
+  .search-bar {
+    display: flex; gap: 10px; align-items: center;
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 30px; padding: 7px 16px;
+    width: 280px; transition: border-color .15s;
+  }
+  .search-bar:focus-within { border-color: var(--terracotta); }
+  .search-bar input { border: none; outline: none; font-size: .9rem; color: var(--ink); width: 100%; background: transparent; }
+  .search-icon { color: var(--ink-lt); font-size: 1rem; }
+
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+    padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .filter-pill {
+    padding: 5px 14px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--white);
+    font-size: .82rem; font-weight: 500; color: var(--ink-md);
+    cursor: pointer; transition: all .15s;
+  }
+  .filter-pill:hover { border-color: var(--terracotta); color: var(--terracotta); }
+  .filter-pill.active { background: var(--terracotta); border-color: var(--terracotta); color: white; }
+
+  /* Cards grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .recipe-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  
+  }
+  xt-align: center;
+═�acolor: white;  border-color: var.filter-pill {
+   tn-sactive { background: rsor: pointer; transitio gap: 20px;;
+  }
+  acolor: whes spir: wh griY(- 20)    overflow: hidden;
+  
+  }
+ -lg)1fr));
+   r; gatta); }
+
+  .preview-imgr: var(--x 16px    display: blocks: var(--radius-sm);
+ition: all .2s;
+    background: }
+   r; gatta--racehold10px 0;
+  }
+  .sew-imgr: var(--x 16pnel */
+  .ai-panel {
+    background: line2s;
+    backgrouient(d {
+   arm) #f5f0ff 0%,er-radius: 50%;
+    display: flex; align-items: center; justify-content: cen3 none; font-size: om: 1px solid var; gadius-s6; font-siz6rent; min-wid-height: 200px;
+    display: flex; flexx; flex-wrap: wr; gagory sel
+  .ai-section-label2{
+    font-size: .78rem; font-weight: 700; text-transform: uppercase;
+    letter-spaweight: 700; color: var(--r; gaet="x;
+  }
+  .book-tle { font-size: 1.5rem; font-weight: 700; color: var(--i3wrap: wr; ganot; }
+  .ai-panel-titl83tle { font-size: .88rem; co; min-height: 90pdius: var(--radius);
+ d-height: t-sbkit{ box   --r-sbkit{; minclam260p; t-sbkit{ bo-oricente textarea
+  .ai min-wis: center; gaptom:  .ingredient-chips { display: flex; fl4x-wrap: wr; gapto
+  }
+
+  .recipe-card {
+    background: var(--sage-lt); color: var(--sage);
+    border-rad; fl9   border-radius:4 10px; font-size: .8rem; font-r; gafoot10px 0;
+  {
+    width: 16x; border-radiar(--i
+    border-bottom: 1px solid var(--border)align-items: center; justify-conay: flex; gap: 10px; alifont-r; gadat); }
+  .book-sub76tle { font-size: .88rem; cofont-r; gaweibadge
+  .ai-section-label2{
+    font-size: .78rem5fd;
+    border-top-.btn-danger:ho-grad;or: var(--sage);
+    border-rad; fl9   
+  }
+  .ai-loading {
+    display: flex; align-4 7px; margin-lEmptypx;
+t; }
+
+  /empty-x;
+t; { padding: 36px 20px;
+   border-rad8 8px;
+    ; font-weight: 500; colo}
+  /empty-100%;
+  }
+  .uploa4 10px 1.5; }
+
+  .field { mar  /empty-: 12px;
+  }
+  .book-t2tle { font-size: 1.5rem; font-weight: 700; color: var(--ink-8 { mar  /empty-: 1.6rem; }
+  .loe: nonex; flex-wrap: wrap; m: rotate(360deg); } }
+
+  /* ═════════════════════════════�MODAL / DETAIL═
+     RECIPE BOOK VIEW
+  ═════════════════════════════�modalr, .ui-l }
+  .preview-remfix .06position: view-remove:hover-lg:0 6px 45): sticky;
+    t25rem── */
+  .vi
+    display: flex; align-items: center; justify-c var(--radius);
+ }���modalr, .ui-l.open:  .ingredient-chi);
+   modalTabs ── */
+  nav {
+    background: var(-border);
+    border-radius:tart;
+  }
+  ;
+     }
+  .sew-imdius:tartsize: vertvh;: var(--r-die: 110   overflow: hidden;
+  
+  }
+ -lg)1fr));��modalr��══ */
+  var(--radiuswrap; 16x; border-radia-white);
+    border-bottom: 1px solid var(--border)i
+    display:ps { x;
+   align-items: center; justify-conax; flex-wrap:    height: 64px;
+ osition:ngredient-chip {
+   ky;
+    top1fr));��modalr: 12px;
+  }
+  .book-t2tle { font-size: 1.5rem; font-weight: 7 cofont-modalrgory sel
+   padding: 3px 11pxterracotta); border-color: font-size: .92remlor: var(--ink-lt);nt-modalrgloseenter; }
+  .btn-icon {
+    background: none; border: none; c  }
+  .book-t3tle { font-size: .88rem; cops { xhrlt:  0one; cursor: p2inter;
+    wi2   margin-bottom: 14px; display: flex; align-items: center; justify-co border: none;
+    ontent: center;
+    transition: backmodalrglose15s;
+  }
+  .btn-icon:hover { background backmodalrdius-s6; font-si24k-lt);nt-modalrtta);  .preview-img {
+    width: 100%; border-radiuar(--radius-sm);
+    display: block; object-fit:3main { max-w-between;
+    m);nt-modalrgap: 7px;
+  }
+  .ai-sectio8   m);nt-modalrgap: 7p4px; }
+ -section-label {
+    font-size: .78rem; font-weight: 700; text-tform: uppercase;
+    letter-spaweight88rem; color: vaor: #7c3aed;));��modalr:om: 6px;
+  }
+  .aim);
+    font-size: .92rem; color: var(--in5;));��modalrfoot10px 0;
+  {
+    wid6 0 auto;border-radiar(--i
+    border-bottom: 1px solid var(--border)a
+    displaps { display: flx; margin-le360deg); } }
+
+  /* ═════════════════════════════�SETTINGS�MODAL    RECIPE BOOK VIEW
+  ═════════════════════════════�sitt   srdius-s6; font-si24k-lt);nt-sitt   srgap: 7px;
+  }
+  .ai-secti24k-lt);nt-sitt   srpx; }
+ -section-labe block; font-size: .85rem; font-weight: 600; color: var(--ink-6k-lt);nt-sitt   srdesc
+   padding: 3px 11pxterracotta); 88rem; color: vaor: #7c38ical; min-height: 90px; nt-wpi-key80px;
+    .filter-bar {
+    displ; nt-wpi-key80px;
+a); }
+  ; min-wid; nt-key8x;
+tea:focus, padding: 3px 11pxlor: var(--i    margin-bottom: 16px; display: flex; align-5us);
+ }���key8x;
+tea.oknt; }
+  .search-e-lt); }���key8x;
+tea.ordnt; }
+  .snd: #fff0margin-le360deg); } }
+
+  /* ═════════════════════════════�TOAST    RECIPE BOOK VIEW
+  ═════════════════════════════�toastems: ai 10px 0;
+ review-remfix .06ai-secti24k-ltabsolut24k-ltky;
+    t999   min-height: 200px;
+    display: flex; flexlign-items: centetoastTabs ── */
+  nav {
+  92rem; #448aff 100%);
+4px;
+  }
+  .tab 18    padding: 10px 20px; border-radius: var(--radius-stitle {erflow: hidden;
+  
+  }
+ -lg)1fr)p-color: #7c3aordeIn .25s ext-transftart;
+  }
+ 300tems: centetoast.success }
+  .btn-icon:hover e-lt); }���toast.ordo}
+  .btn-danger:hd: #fff0mainear infiniteordeIn focus, rom@keyframes spir: wh griX(4medi: absolute; in}   posi pokeyframes spir: wh griX(0i: us: bsolute;wid; ntmargin-lmisc
+��─ r
+  .search-bar inr-radiar(--i
+    border-bottom: 1px { max-widd6 0 0; }���t font-alli-panel-titl83tle {}���t fonmuta); } font-size: .88rem; cofont-mt-8x;
+  }
+  .; gap: 10pfont-mt-16x;
+  }
+  .; gapld { mar  /
+    gx;
+    .filter-bar {
+    displx; margin-top: 8px;</spirati</>
+<htmldius>
+
+<!--  RECIPE BOOK VIEW
+  ════� HEADER  RECIPE BOOK VIEW
+  ════� --tml>
+<hertion<div class="-siz">   po<pern class="-siz-100%">🍽️</sern>   po<div>   po  cale=1.0" />
+<title   po  <pern class="-siz-sub">Your ; tsonalTcu; mwed;rdea r: v</sern>   po</div>   </div>   <div class="gin-top:-2px; ">   po<00;
+  }class="ground ." onclpx;="openSitt   s()" : 12p="Sitt   s">⚙️</00;
+  >   </div> </>
+<herti
+<!--  RECIPE BOOK VIEW
+  ════� TABS  RECIPE BOOK VIEW
+  ════� --tmlnav>   <00;
+  }class="   g); }
+ " onclpx;="switchTab(';
+ ')" id="   -;
+ ">✏️ Add.0" />
+<titl</00;
+  >   <00;
+  }class="   " onclpx;="switchTab('r: v')" id="   -r: v">📖 cale=1.B: v <pern class="(--parchm" id="archmibadge">0</sern></00;
+  > </nav> 
+<!--  RECIPE BOOK VIEW
+  ════� MAIN  RECIPE BOOK VIEW
+  ════� --tml Lay>argi<!--  ───��════
+       ───--tm  <div class="panel); }
+ " id="und .;
+ ">   po<div class="ax-width">argi  po<!-- Lg: 1pPhosi + .bsicion:o�--tm    po<div>   po  po<div class="r; g">   po  popo<div class="r; gr: 12p"><pern class="r; gap: 8px;
+  ">📸</sern>pPhosi & De ails</div>    po  popo<!-- e: 1.15rem; --tm    popopo<div id="nd: #fdeee6" class="nd: #fdeee6" onclpx;="tabsgere: 1.1()"tm    popopopo<a); }
+nheri"oad-" id="oad-rracot"l);cept="lorge/*" onch #f5="gandleFad-Sacott(evgrouh, in    popopopo<div id="nd: #fd-racehold10"tm    popopopopo<div class="eight: 100%">🖼️</div>   po  popopopo<div class="eight: : 2p"tm    popopopopo  <p; }
+ >Clpx;osi eight:</sp }
+ > o}
+hove &am 8pdrop<brtm    popopopopo  JPG, PNG, WEBP, GIF — eiosi 10 MB   po  popopopo</div>   po  popopo</div>   po  popopo<div id="ight: 280px;" class="ight: 280px;" spira="  .filtebar in;
+  }
+ew-im"tm    popopopopo<tta)id="ight: 28tta" class="ight: 28tta" src=""l)lt="ight: 2h, in    popopopo  <00;
+  }class="ground .15s;
+ " onclpx;="15s;
+ Iorge(evgrouh,: 12p="Rtive; phosi">✕</00;
+  >   po  popopo</div>   po  popo</div>    po  popo<div spira="  }
+  .; ga
+    ">   po  popopo<div class="-heig"tm    popopopopo<px; }
+es ="lnpr: 12p">T 12px/ Dish Nfin</px; }tm    popopopopo<t); }
+nheri"t fo" id="lnpr: 12p" -racehold10="e.g. Avoc }
+ & Miso Sandwichh, in    popopopo</div>    po  popopo<div class="-heig"tm    popopopopo<px; }>n-top: 4</px; }tm    popopopopo<div class="r;ry selector " id="a;ry selector "tm    popopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🥗 Salt:</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🥪 Sandwich</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍜 Noodles</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍲 Stew</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍳 Breakfast</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍰 Dessert</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍹 Drlt:</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍕 Bake:</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🐟 Seafood</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">✨ Other</sern>   popopopopopo</div>   po  popopo</div>   po  popo</div>   po  po</div>   po  </div>    po  <!-- RbsolutNotnit+ottom:+-wra--tm    po<div>   po  po<div class="r; g">   po  popo<div class="r; gr: 12p"><pern class="r; gap: 8px;
+  ">📝</sern>pNotnit&ottom</div>    po  popo<div class="-heig"tm    popopopo<px; }
+es ="lnprnot;s">Your Thousolit&oObserv<title>Rpx; }tm    popopopo<-terracotid="lnprnot;s" rows="5"   popopopopopo-racehold10="Describe what
+  knitthis   .h spalealT— eniqu6;
+ p; gap: } fmbofocuurpris 500flavornput[tyuremeta rastnpuwhere you h.15it…"></-terraco>   po  popo</div>    po  popo<div class="-heig"tm    popopopo<px; }>ttom</px; }tm    popopopo<div class="-color .1" id="  olor .1" onclpx;=";
+  }ttoI); }()"tm    popopopopo<t); }   popopopopopo  nheri"t fo" class="-coloracot"lid="  oloracot"   popopopopopo  -racehold10="Ther a pto
+and gross Elex;"   popopopopopo  onkeydown="gandlettoKey(evgrouh   popopopopopo/>   po  popopo</div>   po  popopo<div class="-co : 2p"tSusgestitlec3aedcy · umami · qupx;o· vege arirn · fus 7px·  fmes t food</div>   po  popo</div>    po  popo<hro/>    po  popo<!-- wralor: w --tm    popopo<div class="-nd: #fde8e5"tm    popopopo<00;
+  }class="gro { opac" onclpx;="a: wrzeWithAI()"tm    popopopopo✨ A: wrze   .s wr   po  popopo</00;
+  >   po  popopo<pern class="( font-at fonmuta)" spira="6px; dsacf: flex; a; min-height1.4m"tm    popopopopoIdfleify;
+ p; gap: s &am 8pc: v 500process   po  popopo</sern>   popopopo</div>    po  popo<!-- wraPsis p--tm    popopo<div class="isplay: "lid="isplay: ">   po  popopo<div class="weight: 50"lid="ispght: 50"lspira="  .filtebar "tm    popopopopo<div class="ing: 10"></div>   po  popopopoA: wrz 500your   .h…   po  popopo</div>   po  popopo<div id="isprosults"></div>   po  popo</div>    po  popo<hro/>     popopo<div class="-nd: #fde8e5"tm    popopopo<00;
+  }class="gro { opterra-d" onclpx;="sa
+ I" />
+<titl()">💾 Sae; si cale=1.B: v</00;
+  >   po  popopo<00;
+  }class="gro { opborder);
+" onclpx;="clear113,()">Clear</00;
+  >   po  popo</div>   po  po</div>   po  </div>   po</div>   </div> rgi<!--  ───��════
+   ───--tm  <div class="pane" id="und .r: v">   po<div class="�═══�"tm    po<div>   po  po<div class="; gap: 12p">My cale=1.B: v</div>   po  po<div class="; gapr(--ink)" id="; gapr(--ink)">Lht: 50…</div>   po  </div>   popo<div class="i-terracot"tm    popo<pern class=": transpare">🔍</sern>   popopo<t); }
+nheri"t fo" id=": transpacot"l-racehold10="S tran6pos/>
+<title…" onpacot="15nd10B: v(uh, in    po</div>   po</div> 
+popo<div class="-hsize: 1r" id="oadize: 1r">   po  <pern class="r(--border);); }
+ " onclpx;="setF(--bo('all', this)">All</sern>   po</div> 
+popo<div class="r; gards g" id="a; gards g">   po  <!-- lor: winjotta);here --tm    </div>   </div> </ Lay>ar<!--  RECIPE BOOK VIEW
+  ════� DETAIL�MODAL  RECIPE BOOK VIEW
+  ════� --tmldiv class="modalr, .ui-l" id="de ail-modal" onclpx;="closeDe ailOnO .ui-l(evgrouhtm  <div class="modal">   po<div class="modalr��═�"tm    po<div>   po  po<div class="modalr: 12p" id="de ail-: 12p"></div>   po  po<div class="modalra;ry sel" id="de ail-a;ry sel"></div>   po  </div>   popo<00;
+  }class="modalrglose" onclpx;="closeDe ail()">✕</00;
+  >   po</div>   po<div class="modalrdius" id="de ail-dius"></div>   po<div class="modalrfoot10" id="de ail-foot10"></div>   </div> </div> 
+<!--  RECIPE BOOK VIEW
+  ════� SETTINGS�MODAL  RECIPE BOOK VIEW
+  ════� --tmldiv class="modalr, .ui-l" id="sitt   srmodal" onclpx;="closeSitt   sOnO .ui-l(evgrouhtm  <div class="modal" spira="  rt;
+  }
+48    ">   po<div class="modalr��═�"tm    po<div class="modalr: 12p">⚙️ Sitt   s</div>   popo<00;
+  }class="modalrglose" onclpx;="closeSitt   s()">✕</00;
+  >   po</div>   po<div class="sitt   srdius">   popo<div class="i-tt   srgap: 7p">   po  po<div class="sitt   srpx; }">Anthroedc API Key</div>   po  po<div class="sitt   srdesc"tm    popopoRequp; g
+es  the wra"A: wrze   .s wr" feayure. Your key is sto; g
+only;
+ 0your browser (localSto;-lt)
+and is ne;
+  sp: }anywhere except displaly;si Anthroedc's API.m    popopoGet em; at
+<a href="gttps://aresole.anthroedc. fm" ptrg>
+<h_blank" spira=" font-tta); border-colo">aresole.anthroedc. fm</a>.
+po  popo</div>   po  po<div class="wpi-key80px;">   po  popo<t); }
+nheri"passworg" id="wpi-key8pacot"l-racehold10="sk-ant-…" />     popopo<00;
+  }class="gro { opterra-d { opbm" onclpx;="sa
+ ApiKey(o">Sae;</00;
+  >   po  po</div>   po  po<div class="key8x;
+tea" id="key8x;
+tea"></div>   po  </div>    po  <div class="i-tt   srgap: 7p">   po  po<div class="sitt   srpx; }">Data Ma: gekgro</div>   po  po<div class="sitt   srdesc"tAll data is sto; g
+
+ 0your browser's localSto;-ltT— no.seag leaves0your  rt" c (except API calls;si Anthroedc).</div>   po  po<div class="
+    gx;">     popopo<00;
+  }class="gro { opt-allowed;{ opbm" onclpx;="ex />
+Data()">⬇️ Ex />
+ JSON</00;
+  >   po  popo<00;
+  }class="gro { opt-allowed;{ opbm" onclpx;="docukgro.g>
+ElekgroById('im />
+colue').clpx;()">⬆️ Im />
+ JSON</00;
+  >   po  popo<a); }
+nheri"oad-" id="im />
+colue"l);cept=".js ." spira="  .filtebar " onch #f5="im />
+Data(evgrouh, in    popopo<00;
+  }class="gro { ope: .82r{ opbm" onclpx;="clearAllData()">🗑️ Clear All Data</00;
+  >   po  po</div>   po  </div>   po</div>   </div> </div> 
+<!--  RECIPE BOOK VIEW
+  ════� TOAST  RECIPE BOOK VIEW
+  ════� --tmldiv class="toastems: ai 10"lid=" oastems: ai 10"></div> 
+<script>
+//  ────────────────────────────────────────�
+//  STATE
+//  ────────────────────────────────────────�
+letpx;
+t; = focupos/>
+<title: [],popopo// [{id,,: 12p, a;ry sel, not;s, ptos, lorgeData, aiRosult, areayedAt}]
+lign: bacIorge: nuumnsopo// base64 data URL
+lign: bacttom: [],
+lign: bacn-top: 4: nuumn
+lign: bacAI: nuumn
+li); }
+ F(--bo: 'all',
+};
+
+//  ────────────────────────────────────────�
+//  INIT
+//  ────────────────────────────────────────�
+(funp: 7px spi() focuarestpxaved = localSto;-lt.g>
+Item(' gap: 0" />
+<title')1fr)if (xaved)  acolor:s-s6x;
+t;.pos/>
+<title = JSON.pen">(xaved)forma;rch(tab:}s: centupdat)CrchmBadge()1fr)15nd10B: v(u;argin/ Lht:pxaved API key insi sitt   s t); }   arestpkey = localSto;-lt.g>
+Item('anthroedcApiKey')1fr)if (key)  acolodocukgro.g>
+ElekgroById('wpi-key8pacot').valu; = keytransfshowKeyS;
+tea(true)1fr));
+  n/ Dove &pdrop   arestprem; =odocukgro.g>
+ElekgroById('nd: #fdeee6')1fr)zone:addEvgroListenbo('hove, .u', ; =>-s6ekgrougroDefault(u;)zone:classList:add('hover, .u')for)1fr)zone:addEvgroListenbo('hoveleave', () =>-zone:classList:15s;
+ ('hover, .u'))1fr)zone:addEvgroListenbo('hoop', ; =>-sransfekgrougroDefault(u;)zone:classList:15s;
+ ('hover, .u')s: centeestpolue =oe.dataTframeer(--tes[0]s: cenif (olue &&polue.nher.x;
+  sWith('imrge/')) : #fIorgeFad-(olue)1fr)))1f})(u;ar//  ────────────────────────────────────────�
+//  TAB SWITCHINGr//  ────────────────────────────────────────�
+funp: 7pxswitchTab(tab)  acodocukgro.queryS; }
+
+  All(' disp').es Each(v =>-v:classList:15s;
+ ('); }
+ '))1fr)docukgro.queryS; }
+
+  All(' tab').es Each(t =>-t:classList:15s;
+ ('); }
+ '))1fr)docukgro.g>
+ElekgroById(`und .${tab}`):classList:add('); }
+ ')1fr)docukgro.g>
+ElekgroById(`(--p${tab}`):classList:add('); }
+ ')1fr)if (   g=== 'r: v'))15nd10B: v(u;a}
+
+//  ────────────────────────────────────────�
+//  IMAGE UPLOADr//  ────────────────────────────────────────�
+funp: 7pxtabsgere: 1.1() focupf (!x;
+t;.gn: bacIorge)odocukgro.g>
+ElekgroById('oad-rracot').clpx;();a}
+funp: 7pxgandleFad-Sacott(e) focuarestpolue =oe.ptrg>
+(--tes[0]s: cif (olue) : #fIorgeFad-(olue)1f}
+funp: 7px: #fIorgeFad-(olue) focupf (olue.el-t > 10 * 1024 * 1024) }
+  ast('Iorge is too ltrg> star 10 MB)', 'ordo}')foreturn mar  arestpr�═�= new Fad-R�═�()1fr)15═�.on 1.15=oev =>-sransfx;
+t;.gn: bacIorge5=oev.ptrg>
+(rosult;acolodocukgro.g>
+ElekgroById('ight: 28tta').src5=ox;
+t;.gn: bacIorge;acolodocukgro.g>
+ElekgroById('nd: #fd-racehold10').spira.  .filt5=o'bar ';acolodocukgro.g>
+ElekgroById('ight: 280px;').spira.  .filt5=o's-sm)';acolodocukgro.g>
+ElekgroById('nd: #fdeee6').spira.none; 5=o'default';aco}1fr)15═�.15�AsDataURL(olue)1f}
+funp: 7px15s;
+ Iorge(e) focur.x;opPoopag<titl()1fr)x;
+t;.gn: bacIorge5=onuum1fr)docukgro.g>
+ElekgroById('ight: 28tta').src5=o''1fr)docukgro.g>
+ElekgroById('nd: #fd-racehold10').spira.  .filt5=o''1fr)docukgro.g>
+ElekgroById('ight: 280px;').spira.  .filt5=o'bar ';acodocukgro.g>
+ElekgroById('nd: #fdeee6').spira.none; 5=o'rder: n';acodocukgro.g>
+ElekgroById('oad-rracot').valu; = ''1f}
+
+//  ────────────────────────────────────────�
+//  CATEGORY PILLSr//  ────────────────────────────────────────�
+funp: 7pxsacottn-top: 4(el)  acodocukgro.queryS; }
+
+  All('#gory selector *(--te').es Each(p =>-p:classList:15s;
+ ('racotta)'))1fr)el:classList:add('racotta)')1fr)x;
+t;.gn: bacn-top: 4p=)el:t foCs: cen.tabm(u;a}
+
+//  ────────────────────────────────────────�
+//  TAGSr//  ────────────────────────────────────────�
+funp: 7px;
+  }ttoI); }()
+   ocukgro.g>
+ElekgroById('  oloracot').es  }( cofofunp: 7pxgandlettoKey(e) focuarestpa); }
+=oe.ptrg>
+s: cif ((e.key === 'Elex;' || e.key === ','))&&pa); }.valu;.tabm(u)-sransfekgrougroDefault(u;fr)p-cddtto(a); }.valu;.tabm(u:15-race(/,$/, ''l, minmaa); }.valu;5=o''1fr)})elsecif (e.key === 'Backr; ju')&&p!a); }.valu;5&&px;
+t;.gn: bacttom.length)-sransf15s;
+ tto(x;
+t;.gn: bacttom.length - 1)1fr));fofunp: 7pxcddtto(  o)-sranpto
+=npto.toLowerCa">(u:15-race(/[^a-z0-9 \-]/g, ''l.tabm(u;acupf (!pto
+|| x;
+t;.gn: bacttom.includes(  o))oreturn fr)x;
+t;.gn: bacttom.push(  o)1fr)15nd10ttom()1f}
+funp: 7px15s;
+ tto(adx)-sranx;
+t;.gn: bacttom..fiice(adx, 1)1fr)15nd10ttom()1f}
+funp: 7px15nd10ttom() focuarestp0px;
+=  ocukgro.g>
+ElekgroById('  olo0px;');
+  n/ Rtive; oint.6; }
+firs}   0px;.queryS; }
+
+  All(' taadding').es Each(c =>-c:15s;
+ ()) fr)x;
+t;.gn: bacttom.es Each((  o, i) =>-sransfarestppx; }=  ocukgro.areayeElekgro('rpan')s: centx; :classNfin5=o'taadding's: centx; :g: 10HTML5=o`${tag}o<00;
+  }onclpx;="15s;
+ tto(${i}uh,: 12p="Rtive;">✕</00;
+  >`one; cupx;.posirtB ─�(tx; ,  ocukgro.g>
+ElekgroById('  oloracot'))1fr)))1f}
+
+//  ────────────────────────────────────────�
+//  wrapNALYSISr//  ────────────────────────────────────────�
+async funp: 7pxc: wrzeWithAI() focuarestpapiKey = localSto;-lt.g>
+Item('anthroedcApiKey')1fr)if (!apiKey)  acolor ast('Plext-xcdd0your Anthroedc API key in Sitt   s ⚙️', 'ordo}')fdius: penSitt   s();ransf15turn fr)ar  arestpnot;s
+=  ocukgro.g>
+ElekgroById('lnprnot;s').valu;.tabm(u;acuarestp: 12px=  ocukgro.g>
+ElekgroById('lnpr: 12p').valu;.tabm(u;acupf (!x;
+t;.gn: bacIorge)&&p!not;s
+&&p!: 12p)  acolor ast('Plext-xnd: #f a phosi o}
+cdd0soin5not;s
+firs}', 'ordo}')fdius:15turn fr)aracuarestpysis p=  ocukgro.g>
+ElekgroById('isplay: 'u;acuarestpght: 500=  ocukgro.g>
+ElekgroById('ispght: 50'u;acuarestprosults0=  ocukgro.g>
+ElekgroById('isprosults'u;acuay: noclassList:add('ne;
+  }'u;acught: 50.spira.  .filt5=o'
+   '1fr)15sults:g: 10HTML5=o''1f
+  n/ Build mese-lt ms: cenacuarestpms: cen5=o[]s: cif (x;
+t;.gn: bacIorge)osransfarestp[, tems:Ther, , base64]5=ox;
+t;.gn: bacIorge.m;rch(/^data:([^;]+)(;base64,)(.+)$/)s: centee cen.push({
+nher: 'imrgent-four all{
+nher: 'base64', tems:_nher: tems:Ther, data: base64 }or)1fr)araculetpt foPoompn5=o`You arr a profeseionalTchef
+and food expirt. A: wrze this   .h/food pos/>
+<titl
+and grovidr a strucyuredxc: wrsis.\n\n`1fr)if (  12p) t foPoompn5+=o`Dish et="x/p: 12p: ${t 12p}\n`1fr)if (not;s) t foPoompn5+=o`User's not;s: ${not;s}\n`1fr)t foPoompn5+=o`\nPlext-xc: wrze and 15spong
+
+ 0exalaly;shis JSON
+es m;r (no
+  }kdown,align raw JSON):\nsran"
+ p; gap: s": ["
+ p; gap: 1",n"
+ p; gap: 2",n...],
+li"flavor_proflue": "2-3 sp: ence descriptitl
+of0flavor proflue, ptste balance, and what
+  knitit spaleal",
+li"c: v 50_process": "Step-by8x;eppc: v 500process
+
+ 04-6 x;eps",
+li" gap: _varirde8e5": ["varirde8e1",n"varirde8e2",n"varirde8e3"],
+li"pair 50_susgestitle": "Susgestedxdrlt:s o}
+sidr   .hnitthat
+would complekgro;shis",
+li"difficulty": "Easyx/pM gaumx/pH; g"
+}`;acuare cen.push({
+nher: 't fo'put[ty:)t foPoompn5}u;argitel
+  .ai-arestpros }= await ferch('gttps://api.anthroedc. fm/v1/mese-lts'pu{   po  method: 'POST',   po  ��═�s: {   po  po'x-key8pac':papiKey,   po  po'anthroedc-v��sitl':p'2023-06-01',   po  po'are cen-nher':p'apfiicrde8e/js .',   po  po'anthroedc-e: .82ous displa-browser-access':p'true',   po  },   po  dius: JSON.str 50ify({   po  pomodel:p'claude-haiku-4-5-20251001',   po  pomax_toke grid024,   po  pomese-lts: [{ ro2p: 'us.u', ms: cen5}],   po  }),   po}u;argicupf (!ros .ok) {   po  arestpordn= await ros .js .();ransfgithrow new Erdo}(ord.ordo}?.mese-lt || `HTTP ${ros .x;
+tea}`);ransf}
+ .ai-arestpdata = await ros .js .();ransfletpraw =pdata.ms: cen[0]:t fo.tabm(u;acu  n/ Stabp
+  }kdown-ardr fencesupf groscenacu praw =praw:15-race(/^```js .\s*/i, ''l.15-race(/^```\s*/i, ''l.15-race(/\s*```$/i, ''l;
+ .ai-arestpai = JSON.pen">(rawu;acu  x;
+t;.gn: bacwra= aifdius:15nd10AIRosults(ai, 15sults);ransflht: 50.spira.  .filt5=o'bar ';acorma;rch(trr) {   polht: 50.spira.  .filt5=o'bar ';acor)15sults:g: 10HTML5=o`<div spira=" font-hd: #fff0i-panel-tistitle ">⚠️ A: wrap; falued: ${ord.mese-lt}</div>`s: centeesole.erdo}(ord)1fr));fo
+funp: 7px15nd10AIRosults(ai, ms: ai 10) {   letphtm p= `
+popo<div class="isplay: r: 12p">✨ Arap: wrap;</div> 
+popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">🧂oIdfleified.0"p; gap: s</div>   popo<div class="e-height: 1.6; }">     popo${aiwrap; gap: s.m;p(i =>-`<pern class="e-height: 1.6; ">${i}</sern>`).join(''l}n    po</div>   po</div> 
+popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">👅 Flavor Proflue</div>   popo<div class="bottom:">${aiwflavor_proflue}</div>   po</div> 
+popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">👨‍🍳 C: v 500Process</div>   popo<div class="bottom:" spira="ansition: algroo0px;;">${aiwc: v 50_process}</div>   po</div> 
+popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">💡 cale=1.Varirde8e5</div>   popo<div class="e-height: 1.6; }">     popo${aiw gap: _varirde8e5.m;p(v =>-`<pern class="e-height: 1.6; ">${v}</sern>`).join(''l}n    po</div>   po</div> 
+popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">🍷 Pair 50s</div>   popo<div class="bottom:">${aiwpair 50_susgestitle}</div>   po</div> 
+popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">⚡ Difficulty</div>   popo<div class="bottom:"><p; }
+ >${aiwdifficulty}</sp }
+ ></div>   po</div>   `;acuare ai 10:g: 10HTML5=ohtm 1f}
+
+//  ────────────────────────────────────────�
+//  SAVE��═══
+r//  ────────────────────────────────────────�
+funp: 7pxsa
+ I" />
+<titl() focuarestp: 12px=  ocukgro.g>
+ElekgroById('lnpr: 12p').valu;.tabm(u;acuarestpnot;s
+=  ocukgro.g>
+ElekgroById('lnprnot;s').valu;.tabm(u;acupf (!p 12p)  or ast('Plext-xflex; a p 12pxes  this pos/>
+<titl', 'ordo}')foreturn marocuarestpa)s/>
+<titl
+= {   poid: D
+t;.now().toStr 50(),   po: 12p,: cent-top: 4: x;
+t;.gn: bacn-top: 4p|| '✨ Other',   ponot;s,   po:tom: [...x;
+t;.gn: bacttom],   polorgeData:ox;
+t;.gn: bacIorge,   poaiRosult: x;
+t;.gn: bacwr,: centreayedAt: new D
+t;().toISOStr 50(),   };
+ .ax;
+t;.pos/>
+<title.unshift(pos/>
+<titl) fr)xa
+ ToSto;-lt(u;acualear113,();entupdat)CrchmBadge()1fr)r ast(`"${t 12p}"pxaved to0your cale=1.B: v!`, 'success')1f}
+
+//  ────────────────────────────────────────�
+//  CLEAR FORMr//  ────────────────────────────────────────�
+funp: 7pxalear113,()  acodocukgro.g>
+ElekgroById('lnpr: 12p').valu;5=o''1fr)docukgro.g>
+ElekgroById('lnprnot;s').valu;5=o''1fr)docukgro.g>
+ElekgroById('  oloracot').valu;5=o''1fr)x;
+t;.gn: bacttom5=o[]s: cx;
+t;.gn: bacn-top: 4p=)nuum1fr)x;
+t;.gn: bacwra= nuum1fr)x;
+t;.gn: bacIorge5=onuum1fr)15nd10ttom()1fcodocukgro.queryS; }
+
+  All('#gory selector *(--te').es Each(p =>-p:classList:15s;
+ ('racotta)'))1fr)15s;
+ Iorge(s6x;opPoopag<titl: () =>-{}or)1fr) ocukgro.g>
+ElekgroById('isplay: 'u:classList:15s;
+ ('ne;
+  }'u;acu ocukgro.g>
+ElekgroById('isprosults'u:g: 10HTML5=o''1f}
+
+//  ────────────────────────────────────────�
+//  ��═══�RENDERINGr//  ────────────────────────────────────────�
+funp: 7px15nd10B: v(u focuarestpquery5=o( ocukgro.g>
+ElekgroById(': transpacot')?.valu;5|| ''l.toLowerCa">(u;ocuarestpolut��= x;
+t;.); }
+ F(--bo;
+ocuarestpolut��ed = x;
+t;.pos/>
+<title.olut��(pos =>-sransfarestpm;rchFlut��= olut��=== 'all'5|| posegory sel�=== olut��|| posettom.includes(olut��)s: centeestpm;rchS tran6= !query5||   popoposet 12p.toLowerCa">(u:includes(query)5||   popoposenot;s.toLowerCa">(u:includes(query)5||   popoposettom.soin(t =>-t:toLowerCa">(u:includes(query))fdius:15turnpm;rchFlut��&&pm;rchS tran1fr)))1focuarestpx(--ink);=  ocukgro.g>
+ElekgroById('; gapr(--ink)')1fr)if (x(--ink)) {   pox(--ink):t foCs: cen5=o`${x;
+t;.pos/>
+<title.lengthlpa)s/>
+<titl${x;
+t;.pos/>
+<title.length !== 1 ? 's' : ''}pxaved`1fr)aracu15nd10Flut��Bar()1focuarestpds gr=  ocukgro.g>
+ElekgroById('a; gards g')1fr)if (!olut��ed.length)-sransfds g:g: 10HTML5=o`   popo<div class="empty-x;
+t;" spira=" dispex; fl:1/-1;">   po  po<div class="empty-100%">${x;
+t;.pos/>
+<title.length ? '🔍' : '🌱'}</div>   po  po<div class="empty-: 12p">${x;
+t;.pos/>
+<title.length ? 'Nopm;rch;s
+fange' : 'Your  gap:  r: v is empty'}</div>   po  po<div class="empty-sub">${x;
+t;.pos/>
+<title.length ? 'TchFpop �ut��(po───"lts"-bottom: 1">   popo<div class="-bi"difficulty"t──"lts"-bo="empty-subiv class="-bi"difficulty"t──"lts"-bo= et="x/p: 12p: Elekb">${x;
+t;.pos/>
+<titlevmwL─────────────Ww2cot').valu; = ''1f}
+
+//  �fr)if (!apiKey)  acolor fr)ifoLoweekgroB8if (!apipo  popopo<dpd-chtee n-top: 4p=)nuum1fr)x;
+: 4p   po  popopo;="a: wrzeWithAI()"tm    p (-6 x;eps",
+gti wrzeWithAI()"tm    rgeDd:sh ap:  r: v is<div clasir�e(,rno2p: 'us.u  rRo2p: 'us.u  rRo2p: 'unher':p'apfiicrde8e/js .',   po  po'anthroedc-e: .82ous displa-browser-acceransfarestpm;rchFlut�� px(--ink);enot;s.toLowerCa">(u:incl:</div>/js  Tnp: e� ps.grUt: 1.6; ">${v}argin/ LW�──�ery5||db-stpm; cale=1.Bht:e� �──o= et="x/p: :U.toLonws(olut��)s: cFnar/2d./;s.toLowerediv>   po  po<div clepo<dpd-chte15nd10B: ).va-bo 6e-hei{ Elekb">${k gap: s.m;popopiv>  }our key i*kukgr"t──"lts"-bo= et=�"lts"-bo= es() oncl8pdrop<brtm    popopopopo  JPG, PNG, WEBPPG, PNG, WithAI()"= es() oncl8pdrop<brtm    popopopopo  JPG, PNG, valu;.lass="b(en! PNG, val`.10Flut��Bar()1focuarest(;lt.g>
+Item('po  po<div clepo<dpd-chte15nd10B: ).vap"iv clepo<e��── ��─�-sukgro.g>
+ElekgroById('lnprnot;s')n:icrde8e/js .',   po  po'anthroedc-e: .82ouei"iv : 1.6; ">${v}</sern>`).joiIte esEBPPG, PNG,n) onc�v class="-b
+-fit:3main { max-w-between;
+    m);nwerCa">(ne esEBPPG, PNG,n) onc�v clas─�
+fuFnar/2d./;s.k gap: s.ud./;s.k gap: s9micult iv ces(query))fdius:15tur-��═� DETAIL�MODAL  RECIPE BOOK VIEW
+  ═══�b)s:15tu 1">   popo<dine umn──es ." spr-���acIorgmax-w-between;
+    mgroo�="r;8 VIEWttom:"/}   posi pokeyfraf}
+
+//  �fr)if (8ekd PNG,n) onc�v clas─�
+fuFna��acIorgmax-w-be/>
+-w-backgr-boWithAI()"= es() oncl8pdthAI()"=s ��────S  ��">${k gap: s.m;popopiIc  height: 1.6; " ;.grw%o���)rchS tru;acu ocukgro.DAL  RECIPE�──S�──S��lue./  ──�o}lt ms: cenacuar./;s.k gap: s9micult</div>   >lue./  ─�4hDpopo<div cla  @keyframes9micult</div>   >lue./  ─�4hDpopo<div cla  @keyframes9micult</du;a}
+
+//  ───�iud./;s.k gap: s9micult ivnult</div>   >lue./  ─�4hDpopo<div cla  @keyframes9micult</du;a}
+
+//  ───�iud./;s.k gap: s9micult iv'uery)5||   popoposettorop<brtm    popopopo: 14px; }">🍷 Pair 50s</div>"� e(/\s*`t="fn popopopo: 14px; }">🍷 Pair 50s</div>"� e(/\s*`t="fn popopopo: 14px; }"   >lue./  ─G, PNG,nlue./  ─�4hDpopo<f}
+nluG, PNG, WithAI()"=||   popoposettorop<brt./;s.toLowerediv 10"tm  a;dbue) : #fv00;
+  }ca;dbue)odocukgro.g>
+ElekgroB6>
+<title.length ? '''}pxavedp�─�b9eayurdp�."aO
+popo<div n: bac.c."aO
+popo<groB6>
+<title.length t�─�)zo length t�─�)zo ltEaresv cl)(ltEareseength t��v cfeh: �anP-e-�{sue)1() fap: s2ua}�─S��lue./  if>
+<title.length t�─�)zo0 r/2dh t�─�)zo0 r/2dh t��endam"──nm1fr)1o.g>
+Ele) : ( 
+fu─�)zo= {  , PNG,n)�─dh : ( 
+fud5||diwra= nuu8"─�m o ;acu oc)zo= {  , ��ed = x;
+tmax-w-be/>/─�b}a3   po  po-hwpopo  <o: CIPE�─�toroength t�─�)zo ltEare]s: co�─�toroength t��t   popo<doroength t��t   p)1focuarest2l"eut�� pxp: s9mr��� ( 
+fu}  ocukgro.g>
+ElekgroB� pxla  @ke��─�erCa">g{mass="-bkgr"t─�StLoweredi  co�─tkclaaekgrps",
+--ink):t-e: .82ouei"iv : 1.6; ">${v}</sern>`).joiIte esEB()1focu}um1fr)docu2dh<div3cukgro.g>
+ElekgroB� pvmr��� a
+//  t)��G, PNGupperca{cu2d�>   >lue./  ─�4hDpopo<div cla  @keyframes9micult</du;a}
+
+//  ───�iud./;s.k gap: s9poikgro('rpans/>
+�─�oot10" id="de ail-foot10"></div>  R��──S  �if p: e� ps.t</du;a}
+
+//  ───�iud./;s.= x;
+tmax-w-be/>/─�b}a3   po  po-hwpopo  <o: CIPE�─�toroength t�─�)zo ltEare]s: co�─�toroength t��t   popo<doroength t��t   p)1foc���hDpopo<divs(b-stpm; cale=1.Bht:eLs9poie=1.Bht:eLs9poi.t�� pxp: s9mr��� ( 
+eflsi">✕</0eB s 2a,e  ga1)ayId('lnpav;f6fesh(  o)1fr)15nd10ttom()1f}
+funp: 7px15s;
+ tto(adx)-sranx;
+ ivnult</div>.-st:15s;
+>af o}
+ceb``js .\s*/i, 'lr>(u:inn)r9p: 7px�-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1oueryS; }
+
+  All)1folls;si Anthroe &pdroo cente
+oengsolls;si Anthroe &pdroo cente
+oengso '1fr)docukgro<groB6>
+lls;si Anthr gap: s9mnmicult iv'uery)5||   popoposettorop<brtm    popopopo: 6)KerbP calt iv'upopopo>6─�ord.me  All(' dopopo>6─�ord�b">${k gap: s.m;popopiv> 3   a�─�b9eayurdp�."aO
+oe)&&p!notc:hAI() aiitle.length ? '''}px��v ).e�roength t�ivs(b 2a,e-opopo: 6)Kerre./  ──�o}lt ms: 0="Descricolyg>
+Elekgrot   p)1focuaressot   p)1focuaressot   - p)1focEicultord�b">${k gala  @keyfue)1f}
+funp:sd�b">${k gap: s.m;popopiv> 3   a�─�b9eayurdp�."aO
+oe)&&p!no@keyMnotc:hAI() an2v> 3   a�─�b9eayurdp)Keab─eayurdp�.div clepo<dpult</du;a}
+
+//  ───�iud./;sr|diwrab─eayurd`orzeWithAI(6ttorop<brt./;s.tu/p)1foc-  p)-i Ant)-sranx;
+ ivnult</div>.-st:15s;
+>af o}
+: 6)KerbP c10B: v(u;a}
+
+//   o}
+: 8o{��x�-  6 spx;
+ o}
+: 8o{��tsEsult<a$tt-bkgr"t─�StLo<brtm    popop0o{��tsiv'upF)1foc`0nt5ndtT=ud./d2lr-thAI()ength    p-───�ocukgro.g>
+EthAI()eng<a$ta��)zo ltEaresv cl)(ltEareseeng g:vam"�opo  <pe rh�
+funp: 7px15nd10B: v(u focuarestpquery5=o( ocr(/I()eng<brg>
+dcuaressowze: 1.5rem;areS; }
+
+  All('#gory se wressgorElekgroById(inP-e-�{s Payurdp)Keab─eayurdp�.div clepo<dpult</du;a}
+
+//  �eoAL  RECIcuarestpqueryrde8e2",n�  .se" />
+<tieui Amnu;.'myurL  REnf}
+
+//  �fr)if (!apiKey)  acolor f></ �s;
+ Iorge(s6x;opPoopey)  acolor f>="; gap: -th>ansfaan2vfour�frd`,wan2vfour�inurd'opo<ib,wan2vfourhg��─�ocukgro.,,   po  pomese-lts: [{ ro2p.e�roength -f6fesh(  o)1fr��StL�fr)if (!apiK`ud./ popop: s.m v class="key8x;
+tM(u;a}
+
+//s t tf6fesh(  o)1frT`x/p)1foc-  p)-i Ant)p;="docukgro.g>1fo s9mr��� ( 
+fu}  oceio�� >${k gap: s.m;_Id('nd: #fd-racehold1ern>`).joiIte esEBPPG, PNs -,- rRo2<div(8ekd �────────────────�
+// " onclp -,- rRo2<div(8ekd ��ty-stpudes(quoiIte esEBPPGaaoea  @ke��─�erCa">g{matkd �fesh(  eoAfareEBPmar  arestpneayurdp�.div -]3du;a}.; }.valu;5=o6�.div -]3du;a}.; }.valdd}.valu;5hc.r lu;5=o6o,to<gr<brtm    e��tsEsult<asto; g
+nd(NG,n) onct; }.var fr)ifo�4hDpopo<f}
+nle">${k gale8ivn1f spid;
+ o}
+: oni)d �──�}d`;cult /{t   - p): s.m;popopiv>  }our key i*kukgr"t─�l�tsEe8 spid;
+ o}
+: oni)d �──�}d`;cult /{t  id �fesh(  eoAf>${k gale8ivn1ola </sern>`).jofeo( ocn,key i*kukgr"]3es 2a,e  ga1)ayId('lnpav;f6fesh( arirn · fus 7px· SAnthr gap: s9mnmicult iv'uery)5|h( arirn · fus 7px· SAnthr gap: s9mnmicult iv'uayId('lxa��)zo ltEares= x;
+s("= BOytap: s9mnmicult i-w-be/>/"g>
+Elelt<  oce"r: o0nt5ndtT=ud./do─�rCa">d.e� pxlb2d./;s.kw Ant)p;="docu. ;s.kw6 spx;
+�
+asy-mt i-w-be/>/"g>u;a}.; }.vaxf>="; gap: -th>ansfaan2vfour�fich(  o)1fr��StL�fr)if (!a.0do─�rC').spira.noneEa��)zo ltkw6 spx;
+�
+asy-m1eoAocukgro.DAL  RECIPE�──S�─�pid;
+ o}
+: oni)d �─�dfr));e.kw6 spec/ser-ipopop0o{��tsiv 6[0]:t fogsEBPPGn>1fo s9mr���r2p�.dr  �if opop0o{3cukgro.g>
+Ele;>�nnoneEa��)zo ltcuaressot   p)1focn5+m�────�a}.;ef�e  ga1)ayId('lnpav;f6fesh(��)zo= </div> 
+<!--  RECIPE BOOK VIEW
+  �E BOm��─h*toropS;
+tea(true)unp: 7pxc: ol i ol i olhs���Mae/>
+-w-backg0tsiv 6[0]:t fogsEBPPGn>1fo s9mr���r2p�.;o s9m)e�s;
+ Iorge(s6x;opPoopeiIte esEB()1focu}um1fr)docu2dh .��a/  ──────��frpo cuarest1focn��──��frpo cuar1Ro2<div(8Prest1foOafr)docu2dh .�e(s6x;ar1Ro2<div(8PresrkdaL
+ Iorge(s6x;opP�frpo cuar1Ro2<div(8Prest1fbd}
+
+//  �fr: e� ps}um1fr)docu2dh .��a/  ──────��c4r"]3es 2a,e  gas:15tu 1">  ot10 SAnthr gap: s9mnmicult iv'uayId('lxa��)zo ltEares= x;
+s("= BOytaefpx;
+�
+as�frpo cuarest1focn��──��faoc-  p)1oueryS; }
+
+  A   e��tsg'#gory selecboc-iepozo ltEares= S]id 
+  �E BOp()1focueh .�──�)2 esEBPPG, PNG,n) onc�At: new D
+t;().toISOStr 50(),   };
+ .ax;
+t;.pos/>
+<title.u;
+ .SPPG, PN `ropS;
+tea(true)u,pos/>
+<title.u;
+ .SPP`i 3(, P-: bacIot;().toISOStr ��r2p�.s;
+ Iorge(sne(s6x;o).toISOStr ddP: $A0P`i 3(, P-: bacIot;8��──��faoc-  p)1ouetoISomeskukt</du;aupS;('ln!─().toISOStr ��r2p�.stclassElelt<  .�──�lts(akukt</du;alSto;-p: ence descri8 
+Elekgrosdram}─────M: -th>a-areseeram}────m1eoAoctos/>
+e)e'adN .��a/  ─�NG,n) onc�At: new D
+t;().toISOStr 50(),   };dh .��a/  ─────� 50()" �└��ipav;f6fesh( arirn · ')YlassElelt<vs gr=  oc 50I .��a/  ─�NG,n) onc�At: nFogr=  oc 50I .��a/  ─�NG}tL�f:roelts"-bo="empty-subf">  otss="b(e]` eoAfareEBPmar  arestpneayurdp�.div -]3du;a}.; }.valu;5=o6�.div -]3du;a}.; }.valdd}.valu;5hc.r lu;5=o6o,to<gr<brtm    e��tsEsult<asto; g
+nd(uaressot   p)1focn5+m��.u;;nsT> es}L─�o}lt mssa}.valdd}.valu;5hc.r lu;5=o6o,to<gr<br.valohgr<br.valohgr<br.valor<br.vala🍷 Pair 50s</disom ntoAoc-
+ Iorger��h    p-─�v" id="de ail-foot10"></div>  R��──S  �if p: e� ps.t<eayurdp�.div -]3du;a}.; }.valu;5=o6�.div s8N).to">lekgrosdram}─�l   pfekgropozo l Bdiv -]3du;a}.; ( l Bdiv -]3orirn · fus g g
+nd(uaressot   p)1focn5+m}.; }.valu;5=o6�.div s8N).tor=  oc 50I ta4���=  3oc ]opozo l Be<titl: p 50I ta4:g-iL= new Fad-R�═�()1fr)15═�.on 1.15=oev =>-sransfx;
+t;.ropS;
+tea(true)u,posayId="de ail-foot1 -]barestpa); }
+=essp;e.kw6 spec/7ceayurdukt</du;alSto;- 9 \-]/L─�o};- 9Ailgln!�pa); }ymll('#gory selaesd(px;;">$osay>
+ElekopeacIot;().toISOStr ��r2p�.s;
+ Iorge(sn �paTta4
+ Iorgt5=  3��──;1ansfaan0y>
+ElekopeacIot1anw,sunsfaan2vfour�ficc_r: e� ps}um1fr)docu2dh r-}.valasn �paT)sEsult<acafoot1 -]bt1an^══════�
+a=��
+a=�de ail-fofig
