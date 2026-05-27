@@ -856,6 +856,7 @@ let supabaseClient = null;
 })();
 
 async function loadDataSource() {
+  const localRows = [...state.inspirations];
   if (!hasCloudConfig()) {
     state.storageMode = 'local';
     return;
@@ -863,14 +864,27 @@ async function loadDataSource() {
   try {
     await testCloudConnection(true);
     const cloudRows = await fetchCloudInspirations();
-    state.inspirations = cloudRows;
+    state.inspirations = mergeInspirations(cloudRows, localRows);
     state.storageMode = 'cloud';
+    // If local had entries missing from cloud, try to repair cloud automatically.
+    if (state.inspirations.length > cloudRows.length) {
+      try { await overwriteCloudFromRows(state.inspirations); } catch (err) { console.warn(err); }
+    }
     saveToStorage();
   } catch (err) {
     console.error(err);
     state.storageMode = 'local';
     toast(`Cloud unavailable, using local data (${err.message})`, 'error');
   }
+}
+
+function mergeInspirations(primary, secondary) {
+  const map = new Map();
+  [...primary, ...secondary].forEach(item => {
+    if (!item || !item.id) return;
+    map.set(String(item.id), item);
+  });
+  return [...map.values()].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
 // ─────────────────────────────────────────
@@ -1203,9 +1217,8 @@ async function saveInspiration() {
   if (cloudEnabled) {
     try {
       await upsertCloudInspiration(inspiration);
-      state.inspirations = await fetchCloudInspirations();
       state.storageMode = 'cloud';
-      setCloudStatus(true, `Connected (${state.inspirations.length} cloud entries)`);
+      setCloudStatus(true, `Connected (${state.inspirations.length} entries)`);
       saveToStorage();
     } catch (err) {
       console.error(err);
@@ -1471,9 +1484,8 @@ async function deleteInspiration(id) {
   if (cloudEnabled) {
     try {
       await deleteCloudInspiration(id);
-      state.inspirations = await fetchCloudInspirations();
       state.storageMode = 'cloud';
-      setCloudStatus(true, `Connected (${state.inspirations.length} cloud entries)`);
+      setCloudStatus(true, `Connected (${state.inspirations.length} entries)`);
       saveToStorage();
     } catch (err) {
       console.error(err);
@@ -1600,10 +1612,13 @@ async function fetchCloudInspirations() {
 
 async function upsertCloudInspiration(inspiration) {
   const client = getSupabaseClient();
-  const { error } = await client
+  const { data, error } = await client
     .from('inspirations')
-    .upsert(mapInspirationToCloud(inspiration));
+    .upsert(mapInspirationToCloud(inspiration))
+    .select('id')
+    .single();
   if (error) throw new Error(error.message);
+  if (!data || String(data.id) !== String(inspiration.id)) throw new Error('Cloud upsert verification failed');
 }
 
 async function deleteCloudInspiration(id) {
@@ -1613,12 +1628,16 @@ async function deleteCloudInspiration(id) {
 }
 
 async function overwriteCloudFromLocal() {
+  return overwriteCloudFromRows(state.inspirations);
+}
+
+async function overwriteCloudFromRows(rows) {
   const client = getSupabaseClient();
   const { error: delErr } = await client.from('inspirations').delete().neq('id', '');
   if (delErr) throw new Error(delErr.message);
-  if (!state.inspirations.length) return;
-  const rows = state.inspirations.map(mapInspirationToCloud);
-  const { error: insErr } = await client.from('inspirations').insert(rows);
+  if (!rows.length) return;
+  const cloudRows = rows.map(mapInspirationToCloud);
+  const { error: insErr } = await client.from('inspirations').insert(cloudRows);
   if (insErr) throw new Error(insErr.message);
 }
 
