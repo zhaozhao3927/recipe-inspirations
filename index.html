@@ -1672,8 +1672,10 @@ async function testCloudConnection(silent) {
 async function syncLocalToCloud() {
   try {
     await testCloudConnection(true);
-    await overwriteCloudFromLocal();
-    state.inspirations = await fetchCloudInspirations();
+    const cloudRows = await fetchCloudInspirations();
+    const mergedRows = mergeInspirations(cloudRows, state.inspirations);
+    await overwriteCloudFromRows(mergedRows);
+    state.inspirations = mergedRows;
     saveToStorage();
     renderBook();
     updateCountBadge();
