@@ -777,6 +777,16 @@
       </div>
 
       <div class="settings-section">
+        <div class="settings-label">Account</div>
+        <div class="settings-desc">Sign in to sync your cookbook per account. Each user sees only their own entries.</div>
+        <div class="flex-gap">
+          <button class="btn btn-primary btn-sm" onclick="signInWithGoogle()">Sign in with Google</button>
+          <button class="btn btn-secondary btn-sm" onclick="signOutAccount()">Sign out</button>
+        </div>
+        <div class="key-status" id="auth-status">Not signed in</div>
+      </div>
+
+      <div class="settings-section">
         <div class="settings-label">App Version</div>
         <div class="settings-desc">Compare this on phone and laptop. If versions differ, clear site data and refresh.</div>
         <div class="app-version-pill" id="app-version">v—</div>
@@ -805,6 +815,7 @@ let state = {
   activeFilter: 'all',
   storageMode: 'local',  // local | cloud
   editingId: null,
+  user: null,
 };
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;      // max original file accepted from picker
 const MAX_STORED_IMAGE_BYTES = 850 * 1024;      // target compressed size to fit localStorage
@@ -853,12 +864,20 @@ let supabaseClient = null;
       });
     });
   }
+
+  await initAuthState();
+  subscribeAuthChanges();
 })();
 
 async function loadDataSource() {
   const localRows = [...state.inspirations];
   if (!hasCloudConfig()) {
     state.storageMode = 'local';
+    return;
+  }
+  if (!state.user) {
+    state.storageMode = 'cloud';
+    state.inspirations = [];
     return;
   }
   try {
@@ -1199,6 +1218,7 @@ async function saveInspiration() {
   const where = document.getElementById('inp-where').value.trim();
   const notes = document.getElementById('inp-notes').value.trim();
   if (!title) { toast('Please enter a title for this inspiration', 'error'); return; }
+  if (!ensureSignedInForCloud()) return;
 
   const inspiration = {
     id: state.editingId || Date.now().toString(),
@@ -1213,7 +1233,7 @@ async function saveInspiration() {
   };
 
   state.inspirations = [inspiration, ...state.inspirations.filter(i => i.id !== inspiration.id)];
-  const cloudEnabled = hasCloudConfig();
+  const cloudEnabled = hasCloudConfig() && !!state.user;
   if (cloudEnabled) {
     try {
       await upsertCloudInspiration(inspiration);
@@ -1479,8 +1499,9 @@ async function deleteInspiration(id) {
   const ins = state.inspirations.find(i => i.id === id);
   if (!ins) return;
   if (!confirm(`Delete "${ins.title}"? This cannot be undone.`)) return;
+  if (!ensureSignedInForCloud()) return;
   state.inspirations = state.inspirations.filter(i => i.id !== id);
-  const cloudEnabled = hasCloudConfig();
+  const cloudEnabled = hasCloudConfig() && !!state.user;
   if (cloudEnabled) {
     try {
       await deleteCloudInspiration(id);
@@ -1572,6 +1593,112 @@ function getSupabaseClient() {
   return supabaseClient;
 }
 
+function authRequired() {
+  return hasCloudConfig();
+}
+
+function setAuthStatus(ok, msg) {
+  const el = document.getElementById('auth-status');
+  if (!el) return;
+  el.className = ok ? 'key-status ok' : 'key-status err';
+  el.textContent = `${ok ? '✓' : '✕'} ${msg}`;
+}
+
+async function initAuthState() {
+  if (!hasCloudConfig()) {
+    setAuthStatus(false, 'Configure cloud first');
+    return;
+  }
+  try {
+    const client = getSupabaseClient();
+    const { data, error } = await client.auth.getUser();
+    if (error) throw error;
+    state.user = data.user || null;
+    setAuthStatus(Boolean(state.user), state.user ? `Signed in as ${state.user.email || 'user'}` : 'Not signed in');
+    if (state.user) {
+      await loadDataSource();
+      updateCountBadge();
+      renderBook();
+    } else {
+      state.inspirations = [];
+      renderBook();
+      updateCountBadge();
+    }
+  } catch (err) {
+    console.error(err);
+    setAuthStatus(false, `Auth error: ${err.message}`);
+  }
+}
+
+function subscribeAuthChanges() {
+  if (!hasCloudConfig()) return;
+  try {
+    const client = getSupabaseClient();
+    client.auth.onAuthStateChange(async (_event, session) => {
+      state.user = session?.user || null;
+      setAuthStatus(Boolean(state.user), state.user ? `Signed in as ${state.user.email || 'user'}` : 'Not signed in');
+      if (state.user) {
+        await loadDataSource();
+      } else {
+        state.inspirations = [];
+        state.storageMode = hasCloudConfig() ? 'cloud' : 'local';
+      }
+      saveToStorage();
+      updateCountBadge();
+      renderBook();
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function signInWithGoogle() {
+  if (!hasCloudConfig()) {
+    toast('Please configure Supabase URL and key first', 'error');
+    return;
+  }
+  try {
+    const client = getSupabaseClient();
+    const { error } = await client.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.href },
+    });
+    if (error) throw error;
+  } catch (err) {
+    console.error(err);
+    toast(`Sign in failed: ${err.message}`, 'error');
+  }
+}
+
+async function signOutAccount() {
+  try {
+    if (!hasCloudConfig()) return;
+    const client = getSupabaseClient();
+    const { error } = await client.auth.signOut();
+    if (error) throw error;
+    state.user = null;
+    state.inspirations = [];
+    saveToStorage();
+    updateCountBadge();
+    renderBook();
+    setAuthStatus(false, 'Not signed in');
+    toast('Signed out', 'success');
+  } catch (err) {
+    console.error(err);
+    toast(`Sign out failed: ${err.message}`, 'error');
+  }
+}
+
+function ensureSignedInForCloud() {
+  if (!authRequired()) return true;
+  if (!state.user) {
+    toast('Please sign in (Google) to use cloud sync data', 'error');
+    setAuthStatus(false, 'Not signed in');
+    return false;
+  }
+  return true;
+}
+
 function normalizeCloudRow(row) {
   return {
     id: String(row.id),
@@ -1601,6 +1728,7 @@ function mapInspirationToCloud(ins) {
 }
 
 async function fetchCloudInspirations() {
+  if (!ensureSignedInForCloud()) return [];
   const client = getSupabaseClient();
   const { data, error } = await client
     .from('inspirations')
@@ -1611,10 +1739,13 @@ async function fetchCloudInspirations() {
 }
 
 async function upsertCloudInspiration(inspiration) {
+  if (!ensureSignedInForCloud()) throw new Error('Not signed in');
   const client = getSupabaseClient();
+  const payload = mapInspirationToCloud(inspiration);
+  payload.user_id = state.user.id;
   const { data, error } = await client
     .from('inspirations')
-    .upsert(mapInspirationToCloud(inspiration))
+    .upsert(payload)
     .select('id')
     .single();
   if (error) throw new Error(error.message);
@@ -1622,6 +1753,7 @@ async function upsertCloudInspiration(inspiration) {
 }
 
 async function deleteCloudInspiration(id) {
+  if (!ensureSignedInForCloud()) throw new Error('Not signed in');
   const client = getSupabaseClient();
   const { error } = await client.from('inspirations').delete().eq('id', String(id));
   if (error) throw new Error(error.message);
@@ -1632,14 +1764,16 @@ async function overwriteCloudFromLocal() {
 }
 
 async function overwriteCloudFromRows(rows) {
+  if (!ensureSignedInForCloud()) throw new Error('Not signed in');
   const client = getSupabaseClient();
   if (!rows.length) return;
-  const cloudRows = rows.map(mapInspirationToCloud);
+  const cloudRows = rows.map(item => ({ ...mapInspirationToCloud(item), user_id: state.user.id }));
   const { error: insErr } = await client.from('inspirations').upsert(cloudRows);
   if (insErr) throw new Error(insErr.message);
 }
 
 async function clearCloudRows() {
+  if (!ensureSignedInForCloud()) throw new Error('Not signed in');
   const client = getSupabaseClient();
   const { error } = await client.from('inspirations').delete().neq('id', '');
   if (error) throw new Error(error.message);
@@ -1655,12 +1789,20 @@ async function saveCloudSettings() {
   localStorage.setItem(CLOUD_URL_KEY, url);
   localStorage.setItem(CLOUD_ANON_KEY, anonKey);
   supabaseClient = null;
+  state.user = null;
   await testCloudConnection();
+  await initAuthState();
   toast('Cloud settings saved', 'success');
 }
 
 async function testCloudConnection(silent) {
   try {
+    if (!state.user) {
+      state.storageMode = 'cloud';
+      setCloudStatus(true, 'Configured (sign in required)');
+      if (!silent) toast('Cloud configured. Please sign in.', 'success');
+      return;
+    }
     const rows = await fetchCloudInspirations();
     state.storageMode = 'cloud';
     setCloudStatus(true, `Connected (${rows.length} cloud entries)`);
@@ -1675,6 +1817,7 @@ async function testCloudConnection(silent) {
 
 async function syncLocalToCloud() {
   try {
+    if (!ensureSignedInForCloud()) return;
     await testCloudConnection(true);
     const cloudRows = await fetchCloudInspirations();
     const mergedRows = mergeInspirations(cloudRows, state.inspirations);
@@ -1716,6 +1859,7 @@ function importData(e) {
 }
 async function clearAllData() {
   if (!confirm('Delete ALL inspirations? This cannot be undone!')) return;
+  if (!ensureSignedInForCloud()) return;
   state.inspirations = [];
   saveToStorage();
   if (state.storageMode === 'cloud') {
