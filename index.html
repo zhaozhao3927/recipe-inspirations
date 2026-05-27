@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -320,650 +321,943 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
-  
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform .18s, box-shadow .18s;
+    display: flex; flex-direction: column;
   }
-  xt-align: center;
-═�acolor: white;  border-color: var.filter-pill {
-   tn-sactive { background: rsor: pointer; transitio gap: 20px;;
-  }
-  acolor: whes spir: wh griY(- 20)    overflow: hidden;
-  
-  }
- -lg)1fr));
-   r; gatta); }
-
-  .preview-imgr: var(--x 16px    display: blocks: var(--radius-sm);
-ition: all .2s;
-    background: }
-   r; gatta--racehold10px 0;
-  }
-  .sew-imgr: var(--x 16pnel */
-  .ai-panel {
-    background: line2s;
-    backgrouient(d {
-   arm) #f5f0ff 0%,er-radius: 50%;
-    display: flex; align-items: center; justify-content: cen3 none; font-size: om: 1px solid var; gadius-s6; font-siz6rent; min-wid-height: 200px;
-    display: flex; flexx; flex-wrap: wr; gagory sel
-  .ai-section-label2{
-    font-size: .78rem; font-weight: 700; text-transform: uppercase;
-    letter-spaweight: 700; color: var(--r; gaet="x;
-  }
-  .book-tle { font-size: 1.5rem; font-weight: 700; color: var(--i3wrap: wr; ganot; }
-  .ai-panel-titl83tle { font-size: .88rem; co; min-height: 90pdius: var(--radius);
- d-height: t-sbkit{ box   --r-sbkit{; minclam260p; t-sbkit{ bo-oricente textarea
-  .ai min-wis: center; gaptom:  .ingredient-chips { display: flex; fl4x-wrap: wr; gapto
+  .recipe-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
   }
 
-  .recipe-card {
+  .card-img {
+    width: 100%; height: 180px; object-fit: cover;
+    display: block; background: var(--parchment);
+  }
+  .card-img-placeholder {
+    width: 100%; height: 180px;
+    background: linear-gradient(135deg, var(--parchment) 0%, var(--warm) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; color: var(--border);
+  }
+  .card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .card-category {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--terracotta);
+  }
+  .card-name { font-size: 1rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
+  .card-note {
+    font-size: .83rem; color: var(--ink-lt); line-height: 1.5;
+    overflow: hidden; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    flex: 1;
+  }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .card-tag {
     background: var(--sage-lt); color: var(--sage);
-    border-rad; fl9   border-radius:4 10px; font-size: .8rem; font-r; gafoot10px 0;
-  {
-    width: 16x; border-radiar(--i
-    border-bottom: 1px solid var(--border)align-items: center; justify-conay: flex; gap: 10px; alifont-r; gadat); }
-  .book-sub76tle { font-size: .88rem; cofont-r; gaweibadge
-  .ai-section-label2{
-    font-size: .78rem5fd;
-    border-top-.btn-danger:ho-grad;or: var(--sage);
-    border-rad; fl9   
+    border-radius: 20px; padding: 2px 9px; font-size: .74rem; font-weight: 600;
   }
-  .ai-loading {
-    display: flex; align-4 7px; margin-lEmptypx;
-t; }
+  .card-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .card-date { font-size: .76rem; color: var(--ink-lt); }
+  .card-ai-badge {
+    font-size: .72rem; font-weight: 700; color: #7c3aed;
+    background: #f5f0ff; border-radius: 20px; padding: 2px 9px;
+    display: flex; align-items: center; gap: 4px;
+  }
 
-  /empty-x;
-t; { padding: 36px 20px;
-   border-rad8 8px;
-    ; font-weight: 500; colo}
-  /empty-100%;
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 80px 20px; color: var(--ink-lt);
   }
-  .uploa4 10px 1.5; }
+  .empty-icon { font-size: 4rem; margin-bottom: 16px; }
+  .empty-title { font-size: 1.2rem; font-weight: 700; color: var(--ink-md); margin-bottom: 8px; }
+  .empty-sub { font-size: .9rem; margin-bottom: 24px; }
 
-  .field { mar  /empty-: 12px;
+  /* ══════════════════════════════════
+     MODAL / DETAIL VIEW
+  ══════════════════════════════════ */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(46,34,18,.45);
+    z-index: 200; display: none; align-items: center; justify-content: center;
+    padding: 20px;
   }
-  .book-t2tle { font-size: 1.5rem; font-weight: 700; color: var(--ink-8 { mar  /empty-: 1.6rem; }
-  .loe: nonex; flex-wrap: wrap; m: rotate(360deg); } }
+  .modal-overlay.open { display: flex; }
 
-  /* ═════════════════════════════�MODAL / DETAIL═
-     RECIPE BOOK VIEW
-  ═════════════════════════════�modalr, .ui-l }
-  .preview-remfix .06position: view-remove:hover-lg:0 6px 45): sticky;
-    t25rem── */
-  .vi
-    display: flex; align-items: center; justify-c var(--radius);
- }���modalr, .ui-l.open:  .ingredient-chi);
-   modalTabs ── */
-  nav {
-    background: var(-border);
-    border-radius:tart;
+  .modal {
+    background: var(--white);
+    border-radius: var(--radius);
+    max-width: 720px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg);
   }
-  ;
-     }
-  .sew-imdius:tartsize: vertvh;: var(--r-die: 110   overflow: hidden;
-  
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    position: sticky; top: 0; background: white; z-index: 10;
   }
- -lg)1fr));��modalr��══ */
-  var(--radiuswrap; 16x; border-radia-white);
-    border-bottom: 1px solid var(--border)i
-    display:ps { x;
-   align-items: center; justify-conax; flex-wrap:    height: 64px;
- osition:ngredient-chip {
-   ky;
-    top1fr));��modalr: 12px;
+  .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--ink); }
+  .modal-category { font-size: .8rem; color: var(--terracotta); font-weight: 600; margin-top: 2px; }
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 1.3rem; color: var(--ink-lt); flex-shrink: 0;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; transition: background .15s;
   }
-  .book-t2tle { font-size: 1.5rem; font-weight: 7 cofont-modalrgory sel
-   padding: 3px 11pxterracotta); border-color: font-size: .92remlor: var(--ink-lt);nt-modalrgloseenter; }
-  .btn-icon {
-    background: none; border: none; c  }
-  .book-t3tle { font-size: .88rem; cops { xhrlt:  0one; cursor: p2inter;
-    wi2   margin-bottom: 14px; display: flex; align-items: center; justify-co border: none;
-    ontent: center;
-    transition: backmodalrglose15s;
+  .modal-close:hover { background: var(--parchment); }
+  .modal-body { padding: 24px; }
+  .modal-img { width: 100%; border-radius: var(--radius-sm); display: block; object-fit: cover; max-height: 300px; margin-bottom: 20px; }
+  .modal-section { margin-bottom: 18px; }
+  .modal-section-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-lt); margin-bottom: 6px; }
+  .modal-text { font-size: .92rem; color: var(--ink); line-height: 1.65; }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 10px; flex-wrap: wrap;
   }
-  .btn-icon:hover { background backmodalrdius-s6; font-si24k-lt);nt-modalrtta);  .preview-img {
-    width: 100%; border-radiuar(--radius-sm);
-    display: block; object-fit:3main { max-w-between;
-    m);nt-modalrgap: 7px;
-  }
-  .ai-sectio8   m);nt-modalrgap: 7p4px; }
- -section-label {
-    font-size: .78rem; font-weight: 700; text-tform: uppercase;
-    letter-spaweight88rem; color: vaor: #7c3aed;));��modalr:om: 6px;
-  }
-  .aim);
-    font-size: .92rem; color: var(--in5;));��modalrfoot10px 0;
-  {
-    wid6 0 auto;border-radiar(--i
-    border-bottom: 1px solid var(--border)a
-    displaps { display: flx; margin-le360deg); } }
 
-  /* ═════════════════════════════�SETTINGS�MODAL    RECIPE BOOK VIEW
-  ═════════════════════════════�sitt   srdius-s6; font-si24k-lt);nt-sitt   srgap: 7px;
+  /* ══════════════════════════════════
+     SETTINGS MODAL
+  ══════════════════════════════════ */
+  .settings-body { padding: 24px; }
+  .settings-section { margin-bottom: 24px; }
+  .settings-label { font-size: .85rem; font-weight: 600; color: var(--ink-md); margin-bottom: 6px; }
+  .settings-desc { font-size: .8rem; color: var(--ink-lt); margin-bottom: 8px; line-height: 1.5; }
+  .api-key-wrap { display: flex; gap: 8px; }
+  .api-key-wrap input { flex: 1; }
+  .key-status {
+    font-size: .8rem; margin-top: 6px; display: flex; align-items: center; gap: 5px;
   }
-  .ai-secti24k-lt);nt-sitt   srpx; }
- -section-labe block; font-size: .85rem; font-weight: 600; color: var(--ink-6k-lt);nt-sitt   srdesc
-   padding: 3px 11pxterracotta); 88rem; color: vaor: #7c38ical; min-height: 90px; nt-wpi-key80px;
-    .filter-bar {
-    displ; nt-wpi-key80px;
-a); }
-  ; min-wid; nt-key8x;
-tea:focus, padding: 3px 11pxlor: var(--i    margin-bottom: 16px; display: flex; align-5us);
- }���key8x;
-tea.oknt; }
-  .search-e-lt); }���key8x;
-tea.ordnt; }
-  .snd: #fff0margin-le360deg); } }
+  .key-status.ok { color: var(--sage); }
+  .key-status.err { color: #c0392b; }
 
-  /* ═════════════════════════════�TOAST    RECIPE BOOK VIEW
-  ═════════════════════════════�toastems: ai 10px 0;
- review-remfix .06ai-secti24k-ltabsolut24k-ltky;
-    t999   min-height: 200px;
-    display: flex; flexlign-items: centetoastTabs ── */
-  nav {
-  92rem; #448aff 100%);
-4px;
+  /* ══════════════════════════════════
+     TOAST
+  ══════════════════════════════════ */
+  .toast-container {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    display: flex; flex-direction: column; gap: 8px;
   }
-  .tab 18    padding: 10px 20px; border-radius: var(--radius-stitle {erflow: hidden;
-  
+  .toast {
+    background: var(--ink); color: white;
+    padding: 12px 18px; border-radius: var(--radius-sm);
+    font-size: .88rem; box-shadow: var(--shadow-lg);
+    animation: slideIn .25s ease;
+    max-width: 300px;
   }
- -lg)1fr)p-color: #7c3aordeIn .25s ext-transftart;
+  .toast.success { background: var(--sage); }
+  .toast.error { background: #c0392b; }
+  @keyframes slideIn {
+    from { transform: translateX(40px); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
   }
- 300tems: centetoast.success }
-  .btn-icon:hover e-lt); }���toast.ordo}
-  .btn-danger:hd: #fff0mainear infiniteordeIn focus, rom@keyframes spir: wh griX(4medi: absolute; in}   posi pokeyframes spir: wh griX(0i: us: bsolute;wid; ntmargin-lmisc
-��─ r
-  .search-bar inr-radiar(--i
-    border-bottom: 1px { max-widd6 0 0; }���t font-alli-panel-titl83tle {}���t fonmuta); } font-size: .88rem; cofont-mt-8x;
-  }
-  .; gap: 10pfont-mt-16x;
-  }
-  .; gapld { mar  /
-    gx;
-    .filter-bar {
-    displx; margin-top: 8px;</spirati</>
-<htmldius>
 
-<!--  RECIPE BOOK VIEW
-  ════� HEADER  RECIPE BOOK VIEW
-  ════� --tml>
-<hertion<div class="-siz">   po<pern class="-siz-100%">🍽️</sern>   po<div>   po  cale=1.0" />
-<title   po  <pern class="-siz-sub">Your ; tsonalTcu; mwed;rdea r: v</sern>   po</div>   </div>   <div class="gin-top:-2px; ">   po<00;
-  }class="ground ." onclpx;="openSitt   s()" : 12p="Sitt   s">⚙️</00;
-  >   </div> </>
-<herti
-<!--  RECIPE BOOK VIEW
-  ════� TABS  RECIPE BOOK VIEW
-  ════� --tmlnav>   <00;
-  }class="   g); }
- " onclpx;="switchTab(';
- ')" id="   -;
- ">✏️ Add.0" />
-<titl</00;
-  >   <00;
-  }class="   " onclpx;="switchTab('r: v')" id="   -r: v">📖 cale=1.B: v <pern class="(--parchm" id="archmibadge">0</sern></00;
-  > </nav> 
-<!--  RECIPE BOOK VIEW
-  ════� MAIN  RECIPE BOOK VIEW
-  ════� --tml Lay>argi<!--  ───��════
-       ───--tm  <div class="panel); }
- " id="und .;
- ">   po<div class="ax-width">argi  po<!-- Lg: 1pPhosi + .bsicion:o�--tm    po<div>   po  po<div class="r; g">   po  popo<div class="r; gr: 12p"><pern class="r; gap: 8px;
-  ">📸</sern>pPhosi & De ails</div>    po  popo<!-- e: 1.15rem; --tm    popopo<div id="nd: #fdeee6" class="nd: #fdeee6" onclpx;="tabsgere: 1.1()"tm    popopopo<a); }
-nheri"oad-" id="oad-rracot"l);cept="lorge/*" onch #f5="gandleFad-Sacott(evgrouh, in    popopopo<div id="nd: #fd-racehold10"tm    popopopopo<div class="eight: 100%">🖼️</div>   po  popopopo<div class="eight: : 2p"tm    popopopopo  <p; }
- >Clpx;osi eight:</sp }
- > o}
-hove &am 8pdrop<brtm    popopopopo  JPG, PNG, WEBP, GIF — eiosi 10 MB   po  popopopo</div>   po  popopo</div>   po  popopo<div id="ight: 280px;" class="ight: 280px;" spira="  .filtebar in;
-  }
-ew-im"tm    popopopopo<tta)id="ight: 28tta" class="ight: 28tta" src=""l)lt="ight: 2h, in    popopopo  <00;
-  }class="ground .15s;
- " onclpx;="15s;
- Iorge(evgrouh,: 12p="Rtive; phosi">✕</00;
-  >   po  popopo</div>   po  popo</div>    po  popo<div spira="  }
-  .; ga
-    ">   po  popopo<div class="-heig"tm    popopopopo<px; }
-es ="lnpr: 12p">T 12px/ Dish Nfin</px; }tm    popopopopo<t); }
-nheri"t fo" id="lnpr: 12p" -racehold10="e.g. Avoc }
- & Miso Sandwichh, in    popopopo</div>    po  popopo<div class="-heig"tm    popopopopo<px; }>n-top: 4</px; }tm    popopopopo<div class="r;ry selector " id="a;ry selector "tm    popopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🥗 Salt:</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🥪 Sandwich</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍜 Noodles</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍲 Stew</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍳 Breakfast</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍰 Dessert</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍹 Drlt:</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🍕 Bake:</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">🐟 Seafood</sern>   popopopopopo  <pern class="ctor" onclpx;="sacottn-top: 4(this)">✨ Other</sern>   popopopopopo</div>   po  popopo</div>   po  popo</div>   po  po</div>   po  </div>    po  <!-- RbsolutNotnit+ottom:+-wra--tm    po<div>   po  po<div class="r; g">   po  popo<div class="r; gr: 12p"><pern class="r; gap: 8px;
-  ">📝</sern>pNotnit&ottom</div>    po  popo<div class="-heig"tm    popopopo<px; }
-es ="lnprnot;s">Your Thousolit&oObserv<title>Rpx; }tm    popopopo<-terracotid="lnprnot;s" rows="5"   popopopopopo-racehold10="Describe what
-  knitthis   .h spalealT— eniqu6;
- p; gap: } fmbofocuurpris 500flavornput[tyuremeta rastnpuwhere you h.15it…"></-terraco>   po  popo</div>    po  popo<div class="-heig"tm    popopopo<px; }>ttom</px; }tm    popopopo<div class="-color .1" id="  olor .1" onclpx;=";
-  }ttoI); }()"tm    popopopopo<t); }   popopopopopo  nheri"t fo" class="-coloracot"lid="  oloracot"   popopopopopo  -racehold10="Ther a pto
-and gross Elex;"   popopopopopo  onkeydown="gandlettoKey(evgrouh   popopopopopo/>   po  popopo</div>   po  popopo<div class="-co : 2p"tSusgestitlec3aedcy · umami · qupx;o· vege arirn · fus 7px·  fmes t food</div>   po  popo</div>    po  popo<hro/>    po  popo<!-- wralor: w --tm    popopo<div class="-nd: #fde8e5"tm    popopopo<00;
-  }class="gro { opac" onclpx;="a: wrzeWithAI()"tm    popopopopo✨ A: wrze   .s wr   po  popopo</00;
-  >   po  popopo<pern class="( font-at fonmuta)" spira="6px; dsacf: flex; a; min-height1.4m"tm    popopopopoIdfleify;
- p; gap: s &am 8pc: v 500process   po  popopo</sern>   popopopo</div>    po  popo<!-- wraPsis p--tm    popopo<div class="isplay: "lid="isplay: ">   po  popopo<div class="weight: 50"lid="ispght: 50"lspira="  .filtebar "tm    popopopopo<div class="ing: 10"></div>   po  popopopoA: wrz 500your   .h…   po  popopo</div>   po  popopo<div id="isprosults"></div>   po  popo</div>    po  popo<hro/>     popopo<div class="-nd: #fde8e5"tm    popopopo<00;
-  }class="gro { opterra-d" onclpx;="sa
- I" />
-<titl()">💾 Sae; si cale=1.B: v</00;
-  >   po  popopo<00;
-  }class="gro { opborder);
-" onclpx;="clear113,()">Clear</00;
-  >   po  popo</div>   po  po</div>   po  </div>   po</div>   </div> rgi<!--  ───��════
-   ───--tm  <div class="pane" id="und .r: v">   po<div class="�═══�"tm    po<div>   po  po<div class="; gap: 12p">My cale=1.B: v</div>   po  po<div class="; gapr(--ink)" id="; gapr(--ink)">Lht: 50…</div>   po  </div>   popo<div class="i-terracot"tm    popo<pern class=": transpare">🔍</sern>   popopo<t); }
-nheri"t fo" id=": transpacot"l-racehold10="S tran6pos/>
-<title…" onpacot="15nd10B: v(uh, in    po</div>   po</div> 
-popo<div class="-hsize: 1r" id="oadize: 1r">   po  <pern class="r(--border);); }
- " onclpx;="setF(--bo('all', this)">All</sern>   po</div> 
-popo<div class="r; gards g" id="a; gards g">   po  <!-- lor: winjotta);here --tm    </div>   </div> </ Lay>ar<!--  RECIPE BOOK VIEW
-  ════� DETAIL�MODAL  RECIPE BOOK VIEW
-  ════� --tmldiv class="modalr, .ui-l" id="de ail-modal" onclpx;="closeDe ailOnO .ui-l(evgrouhtm  <div class="modal">   po<div class="modalr��═�"tm    po<div>   po  po<div class="modalr: 12p" id="de ail-: 12p"></div>   po  po<div class="modalra;ry sel" id="de ail-a;ry sel"></div>   po  </div>   popo<00;
-  }class="modalrglose" onclpx;="closeDe ail()">✕</00;
-  >   po</div>   po<div class="modalrdius" id="de ail-dius"></div>   po<div class="modalrfoot10" id="de ail-foot10"></div>   </div> </div> 
-<!--  RECIPE BOOK VIEW
-  ════� SETTINGS�MODAL  RECIPE BOOK VIEW
-  ════� --tmldiv class="modalr, .ui-l" id="sitt   srmodal" onclpx;="closeSitt   sOnO .ui-l(evgrouhtm  <div class="modal" spira="  rt;
-  }
-48    ">   po<div class="modalr��═�"tm    po<div class="modalr: 12p">⚙️ Sitt   s</div>   popo<00;
-  }class="modalrglose" onclpx;="closeSitt   s()">✕</00;
-  >   po</div>   po<div class="sitt   srdius">   popo<div class="i-tt   srgap: 7p">   po  po<div class="sitt   srpx; }">Anthroedc API Key</div>   po  po<div class="sitt   srdesc"tm    popopoRequp; g
-es  the wra"A: wrze   .s wr" feayure. Your key is sto; g
-only;
- 0your browser (localSto;-lt)
-and is ne;
-  sp: }anywhere except displaly;si Anthroedc's API.m    popopoGet em; at
-<a href="gttps://aresole.anthroedc. fm" ptrg>
-<h_blank" spira=" font-tta); border-colo">aresole.anthroedc. fm</a>.
-po  popo</div>   po  po<div class="wpi-key80px;">   po  popo<t); }
-nheri"passworg" id="wpi-key8pacot"l-racehold10="sk-ant-…" />     popopo<00;
-  }class="gro { opterra-d { opbm" onclpx;="sa
- ApiKey(o">Sae;</00;
-  >   po  po</div>   po  po<div class="key8x;
-tea" id="key8x;
-tea"></div>   po  </div>    po  <div class="i-tt   srgap: 7p">   po  po<div class="sitt   srpx; }">Data Ma: gekgro</div>   po  po<div class="sitt   srdesc"tAll data is sto; g
+  /* misc */
+  hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .text-sm { font-size: .83rem; }
+  .text-muted { color: var(--ink-lt); }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .flex-gap { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
 
- 0your browser's localSto;-ltT— no.seag leaves0your  rt" c (except API calls;si Anthroedc).</div>   po  po<div class="
-    gx;">     popopo<00;
-  }class="gro { opt-allowed;{ opbm" onclpx;="ex />
-Data()">⬇️ Ex />
- JSON</00;
-  >   po  popo<00;
-  }class="gro { opt-allowed;{ opbm" onclpx;="docukgro.g>
-ElekgroById('im />
-colue').clpx;()">⬆️ Im />
- JSON</00;
-  >   po  popo<a); }
-nheri"oad-" id="im />
-colue"l);cept=".js ." spira="  .filtebar " onch #f5="im />
-Data(evgrouh, in    popopo<00;
-  }class="gro { ope: .82r{ opbm" onclpx;="clearAllData()">🗑️ Clear All Data</00;
-  >   po  po</div>   po  </div>   po</div>   </div> </div> 
-<!--  RECIPE BOOK VIEW
-  ════� TOAST  RECIPE BOOK VIEW
-  ════� --tmldiv class="toastems: ai 10"lid=" oastems: ai 10"></div> 
+<!-- ═══════════ HEADER ═══════════ -->
+<header>
+  <div class="logo">
+    <span class="logo-icon">🍽️</span>
+    <div>
+      Recipe Inspirations
+      <span class="logo-sub">Your personal culinary idea book</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
+  </div>
+</header>
+
+<!-- ═══════════ TABS ═══════════ -->
+<nav>
+  <button class="tab active" onclick="switchTab('add')" id="tab-add">✏️ Add Inspiration</button>
+  <button class="tab" onclick="switchTab('book')" id="tab-book">📖 Recipe Book <span class="tab-count" id="count-badge">0</span></button>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main>
+
+  <!-- ─── ADD INSPIRATION VIEW ─── -->
+  <div class="view active" id="view-add">
+    <div class="add-grid">
+
+      <!-- Left: Photo + basic info -->
+      <div>
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">📸</span> Photo & Details</div>
+
+          <!-- Upload zone -->
+          <div id="upload-zone" class="upload-zone" onclick="triggerUpload()">
+            <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)" />
+            <div id="upload-placeholder">
+              <div class="upload-icon">🖼️</div>
+              <div class="upload-hint">
+                <strong>Click to upload</strong> or drag &amp; drop<br>
+                JPG, PNG, WEBP, GIF — up to 10 MB
+              </div>
+            </div>
+            <div id="preview-wrap" class="preview-wrap" style="display:none; width:100%;">
+              <img id="preview-img" class="preview-img" src="" alt="preview" />
+              <button class="preview-remove" onclick="removeImage(event)" title="Remove photo">✕</button>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;">
+            <div class="field">
+              <label for="inp-title">Title / Dish Name</label>
+              <input type="text" id="inp-title" placeholder="e.g. Avocado & Miso Sandwich" />
+            </div>
+
+            <div class="field">
+              <label>Category</label>
+              <div class="category-pills" id="category-pills">
+                <span class="pill" onclick="selectCategory(this)">🥗 Salad</span>
+                <span class="pill" onclick="selectCategory(this)">🥪 Sandwich</span>
+                <span class="pill" onclick="selectCategory(this)">🍜 Noodles</span>
+                <span class="pill" onclick="selectCategory(this)">🍲 Stew</span>
+                <span class="pill" onclick="selectCategory(this)">🍳 Breakfast</span>
+                <span class="pill" onclick="selectCategory(this)">🍰 Dessert</span>
+                <span class="pill" onclick="selectCategory(this)">🍹 Drink</span>
+                <span class="pill" onclick="selectCategory(this)">🍕 Baked</span>
+                <span class="pill" onclick="selectCategory(this)">🐟 Seafood</span>
+                <span class="pill" onclick="selectCategory(this)">✨ Other</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Notes + Tags + AI -->
+      <div>
+        <div class="card">
+          <div class="card-title"><span class="card-title-icon">📝</span> Notes & Tags</div>
+
+          <div class="field">
+            <label for="inp-notes">Your Thoughts & Observations</label>
+            <textarea id="inp-notes" rows="5"
+              placeholder="Describe what makes this dish special — unique ingredient combos, surprising flavors, texture contrasts, where you had it…"></textarea>
+          </div>
+
+          <div class="field">
+            <label>Tags</label>
+            <div class="tags-wrap" id="tags-wrap" onclick="focusTagInput()">
+              <input
+                type="text" class="tags-input" id="tags-input"
+                placeholder="Type a tag and press Enter"
+                onkeydown="handleTagKey(event)"
+              />
+            </div>
+            <div class="tag-hint">Suggestions: spicy · umami · quick · vegetarian · fusion · comfort food</div>
+          </div>
+
+          <hr />
+
+          <!-- AI Button -->
+          <div class="form-actions">
+            <button class="btn btn-ai" onclick="analyzeWithAI()">
+              ✨ Analyze with AI
+            </button>
+            <span class="text-sm text-muted" style="align-self:center; line-height:1.4;">
+              Identify ingredients &amp; cooking process
+            </span>
+          </div>
+
+          <!-- AI Panel -->
+          <div class="ai-panel" id="ai-panel">
+            <div class="ai-loading" id="ai-loading" style="display:none">
+              <div class="spinner"></div>
+              Analyzing your dish…
+            </div>
+            <div id="ai-results"></div>
+          </div>
+
+          <hr />
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveInspiration()">💾 Save to Recipe Book</button>
+            <button class="btn btn-secondary" onclick="clearForm()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RECIPE BOOK VIEW ─── -->
+  <div class="view" id="view-book">
+    <div class="book-header">
+      <div>
+        <div class="book-title">My Recipe Book</div>
+        <div class="book-subtitle" id="book-subtitle">Loading…</div>
+      </div>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search inspirations…" oninput="renderBook()" />
+      </div>
+    </div>
+
+    <div class="filter-bar" id="filter-bar">
+      <span class="filter-pill active" onclick="setFilter('all', this)">All</span>
+    </div>
+
+    <div class="cards-grid" id="cards-grid">
+      <!-- Cards injected here -->
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════ DETAIL MODAL ═══════════ -->
+<div class="modal-overlay" id="detail-modal" onclick="closeDetailOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="detail-title"></div>
+        <div class="modal-category" id="detail-category"></div>
+      </div>
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer" id="detail-footer"></div>
+  </div>
+</div>
+
+<!-- ═══════════ SETTINGS MODAL ═══════════ -->
+<div class="modal-overlay" id="settings-modal" onclick="closeSettingsOnOverlay(event)">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ Settings</div>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-section">
+        <div class="settings-label">Anthropic API Key</div>
+        <div class="settings-desc">
+          Required for the AI "Analyze with AI" feature. Your key is stored only in your browser (localStorage) and is never sent anywhere except directly to Anthropic's API.
+          Get one at <a href="https://console.anthropic.com" target="_blank" style="color:var(--terracotta)">console.anthropic.com</a>.
+        </div>
+        <div class="api-key-wrap">
+          <input type="password" id="api-key-input" placeholder="sk-ant-…" />
+          <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save</button>
+        </div>
+        <div class="key-status" id="key-status"></div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">Data Management</div>
+        <div class="settings-desc">All data is stored in your browser's localStorage — nothing leaves your device (except API calls to Anthropic).</div>
+        <div class="flex-gap">
+          <button class="btn btn-secondary btn-sm" onclick="exportData()">⬇️ Export JSON</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('import-file').click()">⬆️ Import JSON</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)" />
+          <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️ Clear All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TOAST ═══════════ -->
+<div class="toast-container" id="toast-container"></div>
+
 <script>
-//  ────────────────────────────────────────�
+// ─────────────────────────────────────────
 //  STATE
-//  ────────────────────────────────────────�
-letpx;
-t; = focupos/>
-<title: [],popopo// [{id,,: 12p, a;ry sel, not;s, ptos, lorgeData, aiRosult, areayedAt}]
-lign: bacIorge: nuumnsopo// base64 data URL
-lign: bacttom: [],
-lign: bacn-top: 4: nuumn
-lign: bacAI: nuumn
-li); }
- F(--bo: 'all',
+// ─────────────────────────────────────────
+let state = {
+  inspirations: [],      // [{id, title, category, notes, tags, imageData, aiResult, createdAt}]
+  currentImage: null,    // base64 data URL
+  currentTags: [],
+  currentCategory: null,
+  currentAI: null,
+  activeFilter: 'all',
 };
 
-//  ────────────────────────────────────────�
+// ─────────────────────────────────────────
 //  INIT
-//  ────────────────────────────────────────�
-(funp: 7px spi() focuarestpxaved = localSto;-lt.g>
-Item(' gap: 0" />
-<title')1fr)if (xaved)  acolor:s-s6x;
-t;.pos/>
-<title = JSON.pen">(xaved)forma;rch(tab:}s: centupdat)CrchmBadge()1fr)15nd10B: v(u;argin/ Lht:pxaved API key insi sitt   s t); }   arestpkey = localSto;-lt.g>
-Item('anthroedcApiKey')1fr)if (key)  acolodocukgro.g>
-ElekgroById('wpi-key8pacot').valu; = keytransfshowKeyS;
-tea(true)1fr));
-  n/ Dove &pdrop   arestprem; =odocukgro.g>
-ElekgroById('nd: #fdeee6')1fr)zone:addEvgroListenbo('hove, .u', ; =>-s6ekgrougroDefault(u;)zone:classList:add('hover, .u')for)1fr)zone:addEvgroListenbo('hoveleave', () =>-zone:classList:15s;
- ('hover, .u'))1fr)zone:addEvgroListenbo('hoop', ; =>-sransfekgrougroDefault(u;)zone:classList:15s;
- ('hover, .u')s: centeestpolue =oe.dataTframeer(--tes[0]s: cenif (olue &&polue.nher.x;
-  sWith('imrge/')) : #fIorgeFad-(olue)1fr)))1f})(u;ar//  ────────────────────────────────────────�
-//  TAB SWITCHINGr//  ────────────────────────────────────────�
-funp: 7pxswitchTab(tab)  acodocukgro.queryS; }
+// ─────────────────────────────────────────
+(function init() {
+  const saved = localStorage.getItem('recipeInspirations');
+  if (saved) {
+    try { state.inspirations = JSON.parse(saved); } catch(e) {}
+  }
+  updateCountBadge();
+  renderBook();
 
-  All(' disp').es Each(v =>-v:classList:15s;
- ('); }
- '))1fr)docukgro.queryS; }
+  // Load saved API key into settings input
+  const key = localStorage.getItem('anthropicApiKey');
+  if (key) {
+    document.getElementById('api-key-input').value = key;
+    showKeyStatus(true);
+  }
 
-  All(' tab').es Each(t =>-t:classList:15s;
- ('); }
- '))1fr)docukgro.g>
-ElekgroById(`und .${tab}`):classList:add('); }
- ')1fr)docukgro.g>
-ElekgroById(`(--p${tab}`):classList:add('); }
- ')1fr)if (   g=== 'r: v'))15nd10B: v(u;a}
+  // Drag & drop
+  const zone = document.getElementById('upload-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) loadImageFile(file);
+  });
+})();
 
-//  ────────────────────────────────────────�
-//  IMAGE UPLOADr//  ────────────────────────────────────────�
-funp: 7pxtabsgere: 1.1() focupf (!x;
-t;.gn: bacIorge)odocukgro.g>
-ElekgroById('oad-rracot').clpx;();a}
-funp: 7pxgandleFad-Sacott(e) focuarestpolue =oe.ptrg>
-(--tes[0]s: cif (olue) : #fIorgeFad-(olue)1f}
-funp: 7px: #fIorgeFad-(olue) focupf (olue.el-t > 10 * 1024 * 1024) }
-  ast('Iorge is too ltrg> star 10 MB)', 'ordo}')foreturn mar  arestpr�═�= new Fad-R�═�()1fr)15═�.on 1.15=oev =>-sransfx;
-t;.gn: bacIorge5=oev.ptrg>
-(rosult;acolodocukgro.g>
-ElekgroById('ight: 28tta').src5=ox;
-t;.gn: bacIorge;acolodocukgro.g>
-ElekgroById('nd: #fd-racehold10').spira.  .filt5=o'bar ';acolodocukgro.g>
-ElekgroById('ight: 280px;').spira.  .filt5=o's-sm)';acolodocukgro.g>
-ElekgroById('nd: #fdeee6').spira.none; 5=o'default';aco}1fr)15═�.15�AsDataURL(olue)1f}
-funp: 7px15s;
- Iorge(e) focur.x;opPoopag<titl()1fr)x;
-t;.gn: bacIorge5=onuum1fr)docukgro.g>
-ElekgroById('ight: 28tta').src5=o''1fr)docukgro.g>
-ElekgroById('nd: #fd-racehold10').spira.  .filt5=o''1fr)docukgro.g>
-ElekgroById('ight: 280px;').spira.  .filt5=o'bar ';acodocukgro.g>
-ElekgroById('nd: #fdeee6').spira.none; 5=o'rder: n';acodocukgro.g>
-ElekgroById('oad-rracot').valu; = ''1f}
+// ─────────────────────────────────────────
+//  TAB SWITCHING
+// ─────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`view-${tab}`).classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  if (tab === 'book') renderBook();
+}
 
-//  ────────────────────────────────────────�
-//  CATEGORY PILLSr//  ────────────────────────────────────────�
-funp: 7pxsacottn-top: 4(el)  acodocukgro.queryS; }
+// ─────────────────────────────────────────
+//  IMAGE UPLOAD
+// ─────────────────────────────────────────
+function triggerUpload() {
+  if (!state.currentImage) document.getElementById('file-input').click();
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) loadImageFile(file);
+}
+function loadImageFile(file) {
+  if (file.size > 10 * 1024 * 1024) { toast('Image is too large (max 10 MB)', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    state.currentImage = ev.target.result;
+    document.getElementById('preview-img').src = state.currentImage;
+    document.getElementById('upload-placeholder').style.display = 'none';
+    document.getElementById('preview-wrap').style.display = 'block';
+    document.getElementById('upload-zone').style.cursor = 'default';
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage(e) {
+  e.stopPropagation();
+  state.currentImage = null;
+  document.getElementById('preview-img').src = '';
+  document.getElementById('upload-placeholder').style.display = '';
+  document.getElementById('preview-wrap').style.display = 'none';
+  document.getElementById('upload-zone').style.cursor = 'pointer';
+  document.getElementById('file-input').value = '';
+}
 
-  All('#gory selector *(--te').es Each(p =>-p:classList:15s;
- ('racotta)'))1fr)el:classList:add('racotta)')1fr)x;
-t;.gn: bacn-top: 4p=)el:t foCs: cen.tabm(u;a}
+// ─────────────────────────────────────────
+//  CATEGORY PILLS
+// ─────────────────────────────────────────
+function selectCategory(el) {
+  document.querySelectorAll('#category-pills .pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  state.currentCategory = el.textContent.trim();
+}
 
-//  ────────────────────────────────────────�
-//  TAGSr//  ────────────────────────────────────────�
-funp: 7px;
-  }ttoI); }()
-   ocukgro.g>
-ElekgroById('  oloracot').es  }( cofofunp: 7pxgandlettoKey(e) focuarestpa); }
-=oe.ptrg>
-s: cif ((e.key === 'Elex;' || e.key === ','))&&pa); }.valu;.tabm(u)-sransfekgrougroDefault(u;fr)p-cddtto(a); }.valu;.tabm(u:15-race(/,$/, ''l, minmaa); }.valu;5=o''1fr)})elsecif (e.key === 'Backr; ju')&&p!a); }.valu;5&&px;
-t;.gn: bacttom.length)-sransf15s;
- tto(x;
-t;.gn: bacttom.length - 1)1fr));fofunp: 7pxcddtto(  o)-sranpto
-=npto.toLowerCa">(u:15-race(/[^a-z0-9 \-]/g, ''l.tabm(u;acupf (!pto
-|| x;
-t;.gn: bacttom.includes(  o))oreturn fr)x;
-t;.gn: bacttom.push(  o)1fr)15nd10ttom()1f}
-funp: 7px15s;
- tto(adx)-sranx;
-t;.gn: bacttom..fiice(adx, 1)1fr)15nd10ttom()1f}
-funp: 7px15nd10ttom() focuarestp0px;
-=  ocukgro.g>
-ElekgroById('  olo0px;');
-  n/ Rtive; oint.6; }
-firs}   0px;.queryS; }
+// ─────────────────────────────────────────
+//  TAGS
+// ─────────────────────────────────────────
+function focusTagInput() { document.getElementById('tags-input').focus(); }
+function handleTagKey(e) {
+  const input = e.target;
+  if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+    e.preventDefault();
+    addTag(input.value.trim().replace(/,$/, ''));
+    input.value = '';
+  } else if (e.key === 'Backspace' && !input.value && state.currentTags.length) {
+    removeTag(state.currentTags.length - 1);
+  }
+}
+function addTag(tag) {
+  tag = tag.toLowerCase().replace(/[^a-z0-9 \-]/g, '').trim();
+  if (!tag || state.currentTags.includes(tag)) return;
+  state.currentTags.push(tag);
+  renderTags();
+}
+function removeTag(idx) {
+  state.currentTags.splice(idx, 1);
+  renderTags();
+}
+function renderTags() {
+  const wrap = document.getElementById('tags-wrap');
+  // Remove all chips first
+  wrap.querySelectorAll('.tag-chip').forEach(c => c.remove());
+  state.currentTags.forEach((tag, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${tag} <button onclick="removeTag(${i})" title="Remove">✕</button>`;
+    wrap.insertBefore(chip, document.getElementById('tags-input'));
+  });
+}
 
-  All(' taadding').es Each(c =>-c:15s;
- ()) fr)x;
-t;.gn: bacttom.es Each((  o, i) =>-sransfarestppx; }=  ocukgro.areayeElekgro('rpan')s: centx; :classNfin5=o'taadding's: centx; :g: 10HTML5=o`${tag}o<00;
-  }onclpx;="15s;
- tto(${i}uh,: 12p="Rtive;">✕</00;
-  >`one; cupx;.posirtB ─�(tx; ,  ocukgro.g>
-ElekgroById('  oloracot'))1fr)))1f}
+// ─────────────────────────────────────────
+//  AI ANALYSIS
+// ─────────────────────────────────────────
+async function analyzeWithAI() {
+  const apiKey = localStorage.getItem('anthropicApiKey');
+  if (!apiKey) {
+    toast('Please add your Anthropic API key in Settings ⚙️', 'error');
+    openSettings();
+    return;
+  }
+  const notes = document.getElementById('inp-notes').value.trim();
+  const title = document.getElementById('inp-title').value.trim();
+  if (!state.currentImage && !notes && !title) {
+    toast('Please upload a photo or add some notes first', 'error');
+    return;
+  }
 
-//  ────────────────────────────────────────�
-//  wrapNALYSISr//  ────────────────────────────────────────�
-async funp: 7pxc: wrzeWithAI() focuarestpapiKey = localSto;-lt.g>
-Item('anthroedcApiKey')1fr)if (!apiKey)  acolor ast('Plext-xcdd0your Anthroedc API key in Sitt   s ⚙️', 'ordo}')fdius: penSitt   s();ransf15turn fr)ar  arestpnot;s
-=  ocukgro.g>
-ElekgroById('lnprnot;s').valu;.tabm(u;acuarestp: 12px=  ocukgro.g>
-ElekgroById('lnpr: 12p').valu;.tabm(u;acupf (!x;
-t;.gn: bacIorge)&&p!not;s
-&&p!: 12p)  acolor ast('Plext-xnd: #f a phosi o}
-cdd0soin5not;s
-firs}', 'ordo}')fdius:15turn fr)aracuarestpysis p=  ocukgro.g>
-ElekgroById('isplay: 'u;acuarestpght: 500=  ocukgro.g>
-ElekgroById('ispght: 50'u;acuarestprosults0=  ocukgro.g>
-ElekgroById('isprosults'u;acuay: noclassList:add('ne;
-  }'u;acught: 50.spira.  .filt5=o'
-   '1fr)15sults:g: 10HTML5=o''1f
-  n/ Build mese-lt ms: cenacuarestpms: cen5=o[]s: cif (x;
-t;.gn: bacIorge)osransfarestp[, tems:Ther, , base64]5=ox;
-t;.gn: bacIorge.m;rch(/^data:([^;]+)(;base64,)(.+)$/)s: centee cen.push({
-nher: 'imrgent-four all{
-nher: 'base64', tems:_nher: tems:Ther, data: base64 }or)1fr)araculetpt foPoompn5=o`You arr a profeseionalTchef
-and food expirt. A: wrze this   .h/food pos/>
-<titl
-and grovidr a strucyuredxc: wrsis.\n\n`1fr)if (  12p) t foPoompn5+=o`Dish et="x/p: 12p: ${t 12p}\n`1fr)if (not;s) t foPoompn5+=o`User's not;s: ${not;s}\n`1fr)t foPoompn5+=o`\nPlext-xc: wrze and 15spong
+  const panel = document.getElementById('ai-panel');
+  const loading = document.getElementById('ai-loading');
+  const results = document.getElementById('ai-results');
+  panel.classList.add('visible');
+  loading.style.display = 'flex';
+  results.innerHTML = '';
 
- 0exalaly;shis JSON
-es m;r (no
-  }kdown,align raw JSON):\nsran"
- p; gap: s": ["
- p; gap: 1",n"
- p; gap: 2",n...],
-li"flavor_proflue": "2-3 sp: ence descriptitl
-of0flavor proflue, ptste balance, and what
-  knitit spaleal",
-li"c: v 50_process": "Step-by8x;eppc: v 500process
+  // Build message content
+  const content = [];
+  if (state.currentImage) {
+    const [, mediaType, , base64] = state.currentImage.match(/^data:([^;]+)(;base64,)(.+)$/);
+    content.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } });
+  }
 
- 04-6 x;eps",
-li" gap: _varirde8e5": ["varirde8e1",n"varirde8e2",n"varirde8e3"],
-li"pair 50_susgestitle": "Susgestedxdrlt:s o}
-sidr   .hnitthat
-would complekgro;shis",
-li"difficulty": "Easyx/pM gaumx/pH; g"
-}`;acuare cen.push({
-nher: 't fo'put[ty:)t foPoompn5}u;argitel
-  .ai-arestpros }= await ferch('gttps://api.anthroedc. fm/v1/mese-lts'pu{   po  method: 'POST',   po  ��═�s: {   po  po'x-key8pac':papiKey,   po  po'anthroedc-v��sitl':p'2023-06-01',   po  po'are cen-nher':p'apfiicrde8e/js .',   po  po'anthroedc-e: .82ous displa-browser-access':p'true',   po  },   po  dius: JSON.str 50ify({   po  pomodel:p'claude-haiku-4-5-20251001',   po  pomax_toke grid024,   po  pomese-lts: [{ ro2p: 'us.u', ms: cen5}],   po  }),   po}u;argicupf (!ros .ok) {   po  arestpordn= await ros .js .();ransfgithrow new Erdo}(ord.ordo}?.mese-lt || `HTTP ${ros .x;
-tea}`);ransf}
- .ai-arestpdata = await ros .js .();ransfletpraw =pdata.ms: cen[0]:t fo.tabm(u;acu  n/ Stabp
-  }kdown-ardr fencesupf groscenacu praw =praw:15-race(/^```js .\s*/i, ''l.15-race(/^```\s*/i, ''l.15-race(/\s*```$/i, ''l;
- .ai-arestpai = JSON.pen">(rawu;acu  x;
-t;.gn: bacwra= aifdius:15nd10AIRosults(ai, 15sults);ransflht: 50.spira.  .filt5=o'bar ';acorma;rch(trr) {   polht: 50.spira.  .filt5=o'bar ';acor)15sults:g: 10HTML5=o`<div spira=" font-hd: #fff0i-panel-tistitle ">⚠️ A: wrap; falued: ${ord.mese-lt}</div>`s: centeesole.erdo}(ord)1fr));fo
-funp: 7px15nd10AIRosults(ai, ms: ai 10) {   letphtm p= `
-popo<div class="isplay: r: 12p">✨ Arap: wrap;</div> 
-popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">🧂oIdfleified.0"p; gap: s</div>   popo<div class="e-height: 1.6; }">     popo${aiwrap; gap: s.m;p(i =>-`<pern class="e-height: 1.6; ">${i}</sern>`).join(''l}n    po</div>   po</div> 
-popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">👅 Flavor Proflue</div>   popo<div class="bottom:">${aiwflavor_proflue}</div>   po</div> 
-popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">👨‍🍳 C: v 500Process</div>   popo<div class="bottom:" spira="ansition: algroo0px;;">${aiwc: v 50_process}</div>   po</div> 
-popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">💡 cale=1.Varirde8e5</div>   popo<div class="e-height: 1.6; }">     popo${aiw gap: _varirde8e5.m;p(v =>-`<pern class="e-height: 1.6; ">${v}</sern>`).join(''l}n    po</div>   po</div> 
-popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">🍷 Pair 50s</div>   popo<div class="bottom:">${aiwpair 50_susgestitle}</div>   po</div> 
-popo<div class="-bottom: 1">   popo<div class="-bottom: 14px; }">⚡ Difficulty</div>   popo<div class="bottom:"><p; }
- >${aiwdifficulty}</sp }
- ></div>   po</div>   `;acuare ai 10:g: 10HTML5=ohtm 1f}
+  let textPrompt = `You are a professional chef and food expert. Analyze this dish/food inspiration and provide a structured analysis.\n\n`;
+  if (title) textPrompt += `Dish name / title: ${title}\n`;
+  if (notes) textPrompt += `User's notes: ${notes}\n`;
+  textPrompt += `\nPlease analyze and respond in exactly this JSON format (no markdown, just raw JSON):\n{
+  "ingredients": ["ingredient1", "ingredient2", ...],
+  "flavor_profile": "2-3 sentence description of flavor profile, taste balance, and what makes it special",
+  "cooking_process": "Step-by-step cooking process in 4-6 steps",
+  "recipe_variations": ["variation1", "variation2", "variation3"],
+  "pairing_suggestions": "Suggested drinks or side dishes that would complement this",
+  "difficulty": "Easy / Medium / Hard"
+}`;
+  content.push({ type: 'text', text: textPrompt });
 
-//  ────────────────────────────────────────�
-//  SAVE��═══
-r//  ────────────────────────────────────────�
-funp: 7pxsa
- I" />
-<titl() focuarestp: 12px=  ocukgro.g>
-ElekgroById('lnpr: 12p').valu;.tabm(u;acuarestpnot;s
-=  ocukgro.g>
-ElekgroById('lnprnot;s').valu;.tabm(u;acupf (!p 12p)  or ast('Plext-xflex; a p 12pxes  this pos/>
-<titl', 'ordo}')foreturn marocuarestpa)s/>
-<titl
-= {   poid: D
-t;.now().toStr 50(),   po: 12p,: cent-top: 4: x;
-t;.gn: bacn-top: 4p|| '✨ Other',   ponot;s,   po:tom: [...x;
-t;.gn: bacttom],   polorgeData:ox;
-t;.gn: bacIorge,   poaiRosult: x;
-t;.gn: bacwr,: centreayedAt: new D
-t;().toISOStr 50(),   };
- .ax;
-t;.pos/>
-<title.unshift(pos/>
-<titl) fr)xa
- ToSto;-lt(u;acualear113,();entupdat)CrchmBadge()1fr)r ast(`"${t 12p}"pxaved to0your cale=1.B: v!`, 'success')1f}
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content }],
+      }),
+    });
 
-//  ────────────────────────────────────────�
-//  CLEAR FORMr//  ────────────────────────────────────────�
-funp: 7pxalear113,()  acodocukgro.g>
-ElekgroById('lnpr: 12p').valu;5=o''1fr)docukgro.g>
-ElekgroById('lnprnot;s').valu;5=o''1fr)docukgro.g>
-ElekgroById('  oloracot').valu;5=o''1fr)x;
-t;.gn: bacttom5=o[]s: cx;
-t;.gn: bacn-top: 4p=)nuum1fr)x;
-t;.gn: bacwra= nuum1fr)x;
-t;.gn: bacIorge5=onuum1fr)15nd10ttom()1fcodocukgro.queryS; }
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error?.message || `HTTP ${resp.status}`);
+    }
 
-  All('#gory selector *(--te').es Each(p =>-p:classList:15s;
- ('racotta)'))1fr)15s;
- Iorge(s6x;opPoopag<titl: () =>-{}or)1fr) ocukgro.g>
-ElekgroById('isplay: 'u:classList:15s;
- ('ne;
-  }'u;acu ocukgro.g>
-ElekgroById('isprosults'u:g: 10HTML5=o''1f}
+    const data = await resp.json();
+    let raw = data.content[0].text.trim();
+    // Strip markdown code fences if present
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
 
-//  ────────────────────────────────────────�
-//  ��═══�RENDERINGr//  ────────────────────────────────────────�
-funp: 7px15nd10B: v(u focuarestpquery5=o( ocukgro.g>
-ElekgroById(': transpacot')?.valu;5|| ''l.toLowerCa">(u;ocuarestpolut��= x;
-t;.); }
- F(--bo;
-ocuarestpolut��ed = x;
-t;.pos/>
-<title.olut��(pos =>-sransfarestpm;rchFlut��= olut��=== 'all'5|| posegory sel�=== olut��|| posettom.includes(olut��)s: centeestpm;rchS tran6= !query5||   popoposet 12p.toLowerCa">(u:includes(query)5||   popoposenot;s.toLowerCa">(u:includes(query)5||   popoposettom.soin(t =>-t:toLowerCa">(u:includes(query))fdius:15turnpm;rchFlut��&&pm;rchS tran1fr)))1focuarestpx(--ink);=  ocukgro.g>
-ElekgroById('; gapr(--ink)')1fr)if (x(--ink)) {   pox(--ink):t foCs: cen5=o`${x;
-t;.pos/>
-<title.lengthlpa)s/>
-<titl${x;
-t;.pos/>
-<title.length !== 1 ? 's' : ''}pxaved`1fr)aracu15nd10Flut��Bar()1focuarestpds gr=  ocukgro.g>
-ElekgroById('a; gards g')1fr)if (!olut��ed.length)-sransfds g:g: 10HTML5=o`   popo<div class="empty-x;
-t;" spira=" dispex; fl:1/-1;">   po  po<div class="empty-100%">${x;
-t;.pos/>
-<title.length ? '🔍' : '🌱'}</div>   po  po<div class="empty-: 12p">${x;
-t;.pos/>
-<title.length ? 'Nopm;rch;s
-fange' : 'Your  gap:  r: v is empty'}</div>   po  po<div class="empty-sub">${x;
-t;.pos/>
-<title.length ? 'TchFpop �ut��(po───"lts"-bottom: 1">   popo<div class="-bi"difficulty"t──"lts"-bo="empty-subiv class="-bi"difficulty"t──"lts"-bo= et="x/p: 12p: Elekb">${x;
-t;.pos/>
-<titlevmwL─────────────Ww2cot').valu; = ''1f}
+    const ai = JSON.parse(raw);
+    state.currentAI = ai;
+    renderAIResults(ai, results);
+    loading.style.display = 'none';
+  } catch(err) {
+    loading.style.display = 'none';
+    results.innerHTML = `<div style="color:#c0392b; font-size:.88rem;">⚠️ Analysis failed: ${err.message}</div>`;
+    console.error(err);
+  }
+}
 
-//  �fr)if (!apiKey)  acolor fr)ifoLoweekgroB8if (!apipo  popopo<dpd-chtee n-top: 4p=)nuum1fr)x;
-: 4p   po  popopo;="a: wrzeWithAI()"tm    p (-6 x;eps",
-gti wrzeWithAI()"tm    rgeDd:sh ap:  r: v is<div clasir�e(,rno2p: 'us.u  rRo2p: 'us.u  rRo2p: 'unher':p'apfiicrde8e/js .',   po  po'anthroedc-e: .82ous displa-browser-acceransfarestpm;rchFlut�� px(--ink);enot;s.toLowerCa">(u:incl:</div>/js  Tnp: e� ps.grUt: 1.6; ">${v}argin/ LW�──�ery5||db-stpm; cale=1.Bht:e� �──o= et="x/p: :U.toLonws(olut��)s: cFnar/2d./;s.toLowerediv>   po  po<div clepo<dpd-chte15nd10B: ).va-bo 6e-hei{ Elekb">${k gap: s.m;popopiv>  }our key i*kukgr"t──"lts"-bo= et=�"lts"-bo= es() oncl8pdrop<brtm    popopopopo  JPG, PNG, WEBPPG, PNG, WithAI()"= es() oncl8pdrop<brtm    popopopopo  JPG, PNG, valu;.lass="b(en! PNG, val`.10Flut��Bar()1focuarest(;lt.g>
-Item('po  po<div clepo<dpd-chte15nd10B: ).vap"iv clepo<e��── ��─�-sukgro.g>
-ElekgroById('lnprnot;s')n:icrde8e/js .',   po  po'anthroedc-e: .82ouei"iv : 1.6; ">${v}</sern>`).joiIte esEBPPG, PNG,n) onc�v class="-b
--fit:3main { max-w-between;
-    m);nwerCa">(ne esEBPPG, PNG,n) onc�v clas─�
-fuFnar/2d./;s.k gap: s.ud./;s.k gap: s9micult iv ces(query))fdius:15tur-��═� DETAIL�MODAL  RECIPE BOOK VIEW
-  ═══�b)s:15tu 1">   popo<dine umn──es ." spr-���acIorgmax-w-between;
-    mgroo�="r;8 VIEWttom:"/}   posi pokeyfraf}
+function renderAIResults(ai, container) {
+  let html = `
+    <div class="ai-panel-title">✨ AI Analysis</div>
 
-//  �fr)if (8ekd PNG,n) onc�v clas─�
-fuFna��acIorgmax-w-be/>
--w-backgr-boWithAI()"= es() oncl8pdthAI()"=s ��────S  ��">${k gap: s.m;popopiIc  height: 1.6; " ;.grw%o���)rchS tru;acu ocukgro.DAL  RECIPE�──S�──S��lue./  ──�o}lt ms: cenacuar./;s.k gap: s9micult</div>   >lue./  ─�4hDpopo<div cla  @keyframes9micult</div>   >lue./  ─�4hDpopo<div cla  @keyframes9micult</du;a}
+    <div class="ai-section">
+      <div class="ai-section-label">🧂 Identified Ingredients</div>
+      <div class="ingredient-chips">
+        ${ai.ingredients.map(i => `<span class="ingredient-chip">${i}</span>`).join('')}
+      </div>
+    </div>
 
-//  ───�iud./;s.k gap: s9micult ivnult</div>   >lue./  ─�4hDpopo<div cla  @keyframes9micult</du;a}
+    <div class="ai-section">
+      <div class="ai-section-label">👅 Flavor Profile</div>
+      <div class="ai-text">${ai.flavor_profile}</div>
+    </div>
 
-//  ───�iud./;s.k gap: s9micult iv'uery)5||   popoposettorop<brtm    popopopo: 14px; }">🍷 Pair 50s</div>"� e(/\s*`t="fn popopopo: 14px; }">🍷 Pair 50s</div>"� e(/\s*`t="fn popopopo: 14px; }"   >lue./  ─G, PNG,nlue./  ─�4hDpopo<f}
-nluG, PNG, WithAI()"=||   popoposettorop<brt./;s.toLowerediv 10"tm  a;dbue) : #fv00;
-  }ca;dbue)odocukgro.g>
-ElekgroB6>
-<title.length ? '''}pxavedp�─�b9eayurdp�."aO
-popo<div n: bac.c."aO
-popo<groB6>
-<title.length t�─�)zo length t�─�)zo ltEaresv cl)(ltEareseength t��v cfeh: �anP-e-�{sue)1() fap: s2ua}�─S��lue./  if>
-<title.length t�─�)zo0 r/2dh t�─�)zo0 r/2dh t��endam"──nm1fr)1o.g>
-Ele) : ( 
-fu─�)zo= {  , PNG,n)�─dh : ( 
-fud5||diwra= nuu8"─�m o ;acu oc)zo= {  , ��ed = x;
-tmax-w-be/>/─�b}a3   po  po-hwpopo  <o: CIPE�─�toroength t�─�)zo ltEare]s: co�─�toroength t��t   popo<doroength t��t   p)1focuarest2l"eut�� pxp: s9mr��� ( 
-fu}  ocukgro.g>
-ElekgroB� pxla  @ke��─�erCa">g{mass="-bkgr"t─�StLoweredi  co�─tkclaaekgrps",
---ink):t-e: .82ouei"iv : 1.6; ">${v}</sern>`).joiIte esEB()1focu}um1fr)docu2dh<div3cukgro.g>
-ElekgroB� pvmr��� a
-//  t)��G, PNGupperca{cu2d�>   >lue./  ─�4hDpopo<div cla  @keyframes9micult</du;a}
+    <div class="ai-section">
+      <div class="ai-section-label">👨‍🍳 Cooking Process</div>
+      <div class="ai-text" style="white-space:pre-wrap;">${ai.cooking_process}</div>
+    </div>
 
-//  ───�iud./;s.k gap: s9poikgro('rpans/>
-�─�oot10" id="de ail-foot10"></div>  R��──S  �if p: e� ps.t</du;a}
+    <div class="ai-section">
+      <div class="ai-section-label">💡 Recipe Variations</div>
+      <div class="ingredient-chips">
+        ${ai.recipe_variations.map(v => `<span class="ingredient-chip">${v}</span>`).join('')}
+      </div>
+    </div>
 
-//  ───�iud./;s.= x;
-tmax-w-be/>/─�b}a3   po  po-hwpopo  <o: CIPE�─�toroength t�─�)zo ltEare]s: co�─�toroength t��t   popo<doroength t��t   p)1foc���hDpopo<divs(b-stpm; cale=1.Bht:eLs9poie=1.Bht:eLs9poi.t�� pxp: s9mr��� ( 
-eflsi">✕</0eB s 2a,e  ga1)ayId('lnpav;f6fesh(  o)1fr)15nd10ttom()1f}
-funp: 7px15s;
- tto(adx)-sranx;
- ivnult</div>.-st:15s;
->af o}
-ceb``js .\s*/i, 'lr>(u:inn)r9p: 7px�-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1foc-  p)1oueryS; }
+    <div class="ai-section">
+      <div class="ai-section-label">🍷 Pairings</div>
+      <div class="ai-text">${ai.pairing_suggestions}</div>
+    </div>
 
-  All)1folls;si Anthroe &pdroo cente
-oengsolls;si Anthroe &pdroo cente
-oengso '1fr)docukgro<groB6>
-lls;si Anthr gap: s9mnmicult iv'uery)5||   popoposettorop<brtm    popopopo: 6)KerbP calt iv'upopopo>6─�ord.me  All(' dopopo>6─�ord�b">${k gap: s.m;popopiv> 3   a�─�b9eayurdp�."aO
-oe)&&p!notc:hAI() aiitle.length ? '''}px��v ).e�roength t�ivs(b 2a,e-opopo: 6)Kerre./  ──�o}lt ms: 0="Descricolyg>
-Elekgrot   p)1focuaressot   p)1focuaressot   - p)1focEicultord�b">${k gala  @keyfue)1f}
-funp:sd�b">${k gap: s.m;popopiv> 3   a�─�b9eayurdp�."aO
-oe)&&p!no@keyMnotc:hAI() an2v> 3   a�─�b9eayurdp)Keab─eayurdp�.div clepo<dpult</du;a}
+    <div class="ai-section">
+      <div class="ai-section-label">⚡ Difficulty</div>
+      <div class="ai-text"><strong>${ai.difficulty}</strong></div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
 
-//  ───�iud./;sr|diwrab─eayurd`orzeWithAI(6ttorop<brt./;s.tu/p)1foc-  p)-i Ant)-sranx;
- ivnult</div>.-st:15s;
->af o}
-: 6)KerbP c10B: v(u;a}
+// ─────────────────────────────────────────
+//  SAVE INSPIRATION
+// ─────────────────────────────────────────
+function saveInspiration() {
+  const title = document.getElementById('inp-title').value.trim();
+  const notes = document.getElementById('inp-notes').value.trim();
+  if (!title) { toast('Please enter a title for this inspiration', 'error'); return; }
 
-//   o}
-: 8o{��x�-  6 spx;
- o}
-: 8o{��tsEsult<a$tt-bkgr"t─�StLo<brtm    popop0o{��tsiv'upF)1foc`0nt5ndtT=ud./d2lr-thAI()ength    p-───�ocukgro.g>
-EthAI()eng<a$ta��)zo ltEaresv cl)(ltEareseeng g:vam"�opo  <pe rh�
-funp: 7px15nd10B: v(u focuarestpquery5=o( ocr(/I()eng<brg>
-dcuaressowze: 1.5rem;areS; }
+  const inspiration = {
+    id: Date.now().toString(),
+    title,
+    category: state.currentCategory || '✨ Other',
+    notes,
+    tags: [...state.currentTags],
+    imageData: state.currentImage,
+    aiResult: state.currentAI,
+    createdAt: new Date().toISOString(),
+  };
 
-  All('#gory se wressgorElekgroById(inP-e-�{s Payurdp)Keab─eayurdp�.div clepo<dpult</du;a}
+  state.inspirations.unshift(inspiration);
+  saveToStorage();
+  clearForm();
+  updateCountBadge();
+  toast(`"${title}" saved to your Recipe Book!`, 'success');
+}
 
-//  �eoAL  RECIcuarestpqueryrde8e2",n�  .se" />
-<tieui Amnu;.'myurL  REnf}
+// ─────────────────────────────────────────
+//  CLEAR FORM
+// ─────────────────────────────────────────
+function clearForm() {
+  document.getElementById('inp-title').value = '';
+  document.getElementById('inp-notes').value = '';
+  document.getElementById('tags-input').value = '';
+  state.currentTags = [];
+  state.currentCategory = null;
+  state.currentAI = null;
+  state.currentImage = null;
+  renderTags();
+  document.querySelectorAll('#category-pills .pill').forEach(p => p.classList.remove('selected'));
+  removeImage({ stopPropagation: () => {} });
+  document.getElementById('ai-panel').classList.remove('visible');
+  document.getElementById('ai-results').innerHTML = '';
+}
 
-//  �fr)if (!apiKey)  acolor f></ �s;
- Iorge(s6x;opPoopey)  acolor f>="; gap: -th>ansfaan2vfour�frd`,wan2vfour�inurd'opo<ib,wan2vfourhg��─�ocukgro.,,   po  pomese-lts: [{ ro2p.e�roength -f6fesh(  o)1fr��StL�fr)if (!apiK`ud./ popop: s.m v class="key8x;
-tM(u;a}
+// ─────────────────────────────────────────
+//  RECIPE BOOK RENDERING
+// ─────────────────────────────────────────
+function renderBook() {
+  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const filter = state.activeFilter;
 
-//s t tf6fesh(  o)1frT`x/p)1foc-  p)-i Ant)p;="docukgro.g>1fo s9mr��� ( 
-fu}  oceio�� >${k gap: s.m;_Id('nd: #fd-racehold1ern>`).joiIte esEBPPG, PNs -,- rRo2<div(8ekd �────────────────�
-// " onclp -,- rRo2<div(8ekd ��ty-stpudes(quoiIte esEBPPGaaoea  @ke��─�erCa">g{matkd �fesh(  eoAfareEBPmar  arestpneayurdp�.div -]3du;a}.; }.valu;5=o6�.div -]3du;a}.; }.valdd}.valu;5hc.r lu;5=o6o,to<gr<brtm    e��tsEsult<asto; g
-nd(NG,n) onct; }.var fr)ifo�4hDpopo<f}
-nle">${k gale8ivn1f spid;
- o}
-: oni)d �──�}d`;cult /{t   - p): s.m;popopiv>  }our key i*kukgr"t─�l�tsEe8 spid;
- o}
-: oni)d �──�}d`;cult /{t  id �fesh(  eoAf>${k gale8ivn1ola </sern>`).jofeo( ocn,key i*kukgr"]3es 2a,e  ga1)ayId('lnpav;f6fesh( arirn · fus 7px· SAnthr gap: s9mnmicult iv'uery)5|h( arirn · fus 7px· SAnthr gap: s9mnmicult iv'uayId('lxa��)zo ltEares= x;
-s("= BOytap: s9mnmicult i-w-be/>/"g>
-Elelt<  oce"r: o0nt5ndtT=ud./do─�rCa">d.e� pxlb2d./;s.kw Ant)p;="docu. ;s.kw6 spx;
-�
-asy-mt i-w-be/>/"g>u;a}.; }.vaxf>="; gap: -th>ansfaan2vfour�fich(  o)1fr��StL�fr)if (!a.0do─�rC').spira.noneEa��)zo ltkw6 spx;
-�
-asy-m1eoAocukgro.DAL  RECIPE�──S�─�pid;
- o}
-: oni)d �─�dfr));e.kw6 spec/ser-ipopop0o{��tsiv 6[0]:t fogsEBPPGn>1fo s9mr���r2p�.dr  �if opop0o{3cukgro.g>
-Ele;>�nnoneEa��)zo ltcuaressot   p)1focn5+m�────�a}.;ef�e  ga1)ayId('lnpav;f6fesh(��)zo= </div> 
-<!--  RECIPE BOOK VIEW
-  �E BOm��─h*toropS;
-tea(true)unp: 7pxc: ol i ol i olhs���Mae/>
--w-backg0tsiv 6[0]:t fogsEBPPGn>1fo s9mr���r2p�.;o s9m)e�s;
- Iorge(s6x;opPoopeiIte esEB()1focu}um1fr)docu2dh .��a/  ──────��frpo cuarest1focn��──��frpo cuar1Ro2<div(8Prest1foOafr)docu2dh .�e(s6x;ar1Ro2<div(8PresrkdaL
- Iorge(s6x;opP�frpo cuar1Ro2<div(8Prest1fbd}
+  const filtered = state.inspirations.filter(ins => {
+    const matchFilter = filter === 'all' || ins.category === filter || ins.tags.includes(filter);
+    const matchSearch = !query ||
+      ins.title.toLowerCase().includes(query) ||
+      ins.notes.toLowerCase().includes(query) ||
+      ins.tags.some(t => t.toLowerCase().includes(query));
+    return matchFilter && matchSearch;
+  });
 
-//  �fr: e� ps}um1fr)docu2dh .��a/  ──────��c4r"]3es 2a,e  gas:15tu 1">  ot10 SAnthr gap: s9mnmicult iv'uayId('lxa��)zo ltEares= x;
-s("= BOytaefpx;
-�
-as�frpo cuarest1focn��──��faoc-  p)1oueryS; }
+  const subtitle = document.getElementById('book-subtitle');
+  if (subtitle) {
+    subtitle.textContent = `${state.inspirations.length} inspiration${state.inspirations.length !== 1 ? 's' : ''} saved`;
+  }
 
-  A   e��tsg'#gory selecboc-iepozo ltEares= S]id 
-  �E BOp()1focueh .�──�)2 esEBPPG, PNG,n) onc�At: new D
-t;().toISOStr 50(),   };
- .ax;
-t;.pos/>
-<title.u;
- .SPPG, PN `ropS;
-tea(true)u,pos/>
-<title.u;
- .SPP`i 3(, P-: bacIot;().toISOStr ��r2p�.s;
- Iorge(sne(s6x;o).toISOStr ddP: $A0P`i 3(, P-: bacIot;8��──��faoc-  p)1ouetoISomeskukt</du;aupS;('ln!─().toISOStr ��r2p�.stclassElelt<  .�──�lts(akukt</du;alSto;-p: ence descri8 
-Elekgrosdram}─────M: -th>a-areseeram}────m1eoAoctos/>
-e)e'adN .��a/  ─�NG,n) onc�At: new D
-t;().toISOStr 50(),   };dh .��a/  ─────� 50()" �└��ipav;f6fesh( arirn · ')YlassElelt<vs gr=  oc 50I .��a/  ─�NG,n) onc�At: nFogr=  oc 50I .��a/  ─�NG}tL�f:roelts"-bo="empty-subf">  otss="b(e]` eoAfareEBPmar  arestpneayurdp�.div -]3du;a}.; }.valu;5=o6�.div -]3du;a}.; }.valdd}.valu;5hc.r lu;5=o6o,to<gr<brtm    e��tsEsult<asto; g
-nd(uaressot   p)1focn5+m��.u;;nsT> es}L─�o}lt mssa}.valdd}.valu;5hc.r lu;5=o6o,to<gr<br.valohgr<br.valohgr<br.valor<br.vala🍷 Pair 50s</disom ntoAoc-
- Iorger��h    p-─�v" id="de ail-foot10"></div>  R��──S  �if p: e� ps.t<eayurdp�.div -]3du;a}.; }.valu;5=o6�.div s8N).to">lekgrosdram}─�l   pfekgropozo l Bdiv -]3du;a}.; ( l Bdiv -]3orirn · fus g g
-nd(uaressot   p)1focn5+m}.; }.valu;5=o6�.div s8N).tor=  oc 50I ta4���=  3oc ]opozo l Be<titl: p 50I ta4:g-iL= new Fad-R�═�()1fr)15═�.on 1.15=oev =>-sransfx;
-t;.ropS;
-tea(true)u,posayId="de ail-foot1 -]barestpa); }
-=essp;e.kw6 spec/7ceayurdukt</du;alSto;- 9 \-]/L─�o};- 9Ailgln!�pa); }ymll('#gory selaesd(px;;">$osay>
-ElekopeacIot;().toISOStr ��r2p�.s;
- Iorge(sn �paTta4
- Iorgt5=  3��──;1ansfaan0y>
-ElekopeacIot1anw,sunsfaan2vfour�ficc_r: e� ps}um1fr)docu2dh r-}.valasn �paT)sEsult<acafoot1 -]bt1an^══════�
-a=��
-a=�de ail-fofig
+  renderFilterBar();
+
+  const grid = document.getElementById('cards-grid');
+  if (!filtered.length) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon">${state.inspirations.length ? '🔍' : '🌱'}</div>
+        <div class="empty-title">${state.inspirations.length ? 'No matches found' : 'Your recipe book is empty'}</div>
+        <div class="empty-sub">${state.inspirations.length ? 'Try a different search or filter.' : 'Start adding food inspirations from your daily life!'}</div>
+        ${!state.inspirations.length ? `<button class="btn btn-primary" onclick="switchTab('add')">✏️ Add your first inspiration</button>` : ''}
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(ins => {
+    const date = new Date(ins.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const imgHtml = ins.imageData
+      ? `<img class="card-img" src="${ins.imageData}" alt="${ins.title}" />`
+      : `<div class="card-img-placeholder">🍽️</div>`;
+    const tagsHtml = ins.tags.length
+      ? `<div class="card-tags">${ins.tags.slice(0,4).map(t => `<span class="card-tag">${t}</span>`).join('')}${ins.tags.length > 4 ? `<span class="card-tag">+${ins.tags.length - 4}</span>` : ''}</div>`
+      : '';
+    const aiBadge = ins.aiResult
+      ? `<span class="card-ai-badge">✨ AI</span>`
+      : '';
+
+    return `
+      <div class="recipe-card" onclick="openDetail('${ins.id}')">
+        ${imgHtml}
+        <div class="card-body">
+          <div class="card-category">${ins.category}</div>
+          <div class="card-name">${escHtml(ins.title)}</div>
+          ${ins.notes ? `<div class="card-note">${escHtml(ins.notes)}</div>` : ''}
+          ${tagsHtml}
+        </div>
+        <div class="card-footer">
+          <span class="card-date">${date}</span>
+          ${aiBadge}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderFilterBar() {
+  // Collect all categories & tags
+  const categories = [...new Set(state.inspirations.map(i => i.category))];
+  const tags = [...new Set(state.inspirations.flatMap(i => i.tags))].slice(0, 15);
+  const filters = [...categories, ...tags];
+
+  const bar = document.getElementById('filter-bar');
+  const allActive = state.activeFilter === 'all' ? 'active' : '';
+  bar.innerHTML = `<span class="filter-pill ${allActive}" onclick="setFilter('all', this)">All (${state.inspirations.length})</span>`;
+  filters.forEach(f => {
+    const active = state.activeFilter === f ? 'active' : '';
+    const count = state.inspirations.filter(i => i.category === f || i.tags.includes(f)).length;
+    bar.innerHTML += `<span class="filter-pill ${active}" onclick="setFilter('${escHtml(f)}', this)">${escHtml(f)} (${count})</span>`;
+  });
+}
+
+function setFilter(filter, el) {
+  state.activeFilter = filter;
+  renderBook();
+}
+
+// ─────────────────────────────────────────
+//  DETAIL MODAL
+// ─────────────────────────────────────────
+function openDetail(id) {
+  const ins = state.inspirations.find(i => i.id === id);
+  if (!ins) return;
+
+  document.getElementById('detail-title').textContent = ins.title;
+  document.getElementById('detail-category').textContent = ins.category;
+
+  const date = new Date(ins.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  let bodyHtml = '';
+  if (ins.imageData) bodyHtml += `<img class="modal-img" src="${ins.imageData}" alt="${ins.title}" />`;
+
+  if (ins.notes) {
+    bodyHtml += `
+      <div class="modal-section">
+        <div class="modal-section-label">📝 Notes</div>
+        <div class="modal-text">${escHtml(ins.notes).replace(/\n/g, '<br>')}</div>
+      </div>`;
+  }
+
+  if (ins.tags.length) {
+    bodyHtml += `
+      <div class="modal-section">
+        <div class="modal-section-label">🏷️ Tags</div>
+        <div class="flex-gap">${ins.tags.map(t => `<span class="card-tag" style="font-size:.85rem;padding:4px 12px;">${escHtml(t)}</span>`).join('')}</div>
+      </div>`;
+  }
+
+  if (ins.aiResult) {
+    const ai = ins.aiResult;
+    bodyHtml += `
+      <div style="background:linear-gradient(135deg,#f5f0ff,#eff6ff);border:1.5px solid #c4b5fd;border-radius:12px;padding:20px;margin-top:8px;">
+        <div class="ai-panel-title">✨ AI Analysis</div>
+        <div class="ai-section">
+          <div class="ai-section-label">🧂 Ingredients</div>
+          <div class="ingredient-chips">${ai.ingredients.map(i => `<span class="ingredient-chip">${escHtml(i)}</span>`).join('')}</div>
+        </div>
+        <div class="ai-section">
+          <div class="ai-section-label">👅 Flavor Profile</div>
+          <div class="ai-text">${escHtml(ai.flavor_profile)}</div>
+        </div>
+        <div class="ai-section">
+          <div class="ai-section-label">👨‍🍳 Cooking Process</div>
+          <div class="ai-text" style="white-space:pre-wrap;">${escHtml(ai.cooking_process)}</div>
+        </div>
+        <div class="ai-section">
+          <div class="ai-section-label">💡 Variations</div>
+          <div class="ingredient-chips">${ai.recipe_variations.map(v => `<span class="ingredient-chip">${escHtml(v)}</span>`).join('')}</div>
+        </div>
+        <div class="ai-section">
+          <div class="ai-section-label">🍷 Pairings</div>
+          <div class="ai-text">${escHtml(ai.pairing_suggestions)}</div>
+        </div>
+        <div class="ai-section">
+          <div class="ai-section-label">⚡ Difficulty</div>
+          <div class="ai-text"><strong>${escHtml(ai.difficulty)}</strong></div>
+        </div>
+      </div>`;
+  }
+
+  bodyHtml += `<div style="font-size:.78rem;color:var(--ink-lt);margin-top:16px;">Saved on ${date}</div>`;
+  document.getElementById('detail-body').innerHTML = bodyHtml;
+
+  document.getElementById('detail-footer').innerHTML = `
+    <button class="btn btn-secondary btn-sm" onclick="editInspiration('${id}')">✏️ Edit</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteInspiration('${id}')">🗑️ Delete</button>
+    <button class="btn btn-secondary btn-sm" style="margin-left:auto;" onclick="closeDetail()">Close</button>
+  `;
+
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
+function closeDetailOnOverlay(e) { if (e.target === document.getElementById('detail-modal')) closeDetail(); }
+
+function editInspiration(id) {
+  const ins = state.inspirations.find(i => i.id === id);
+  if (!ins) return;
+  closeDetail();
+  // Populate form
+  document.getElementById('inp-title').value = ins.title;
+  document.getElementById('inp-notes').value = ins.notes;
+  state.currentTags = [...ins.tags];
+  state.currentCategory = ins.category;
+  state.currentAI = ins.aiResult || null;
+  state.currentImage = ins.imageData || null;
+
+  // Set image
+  if (ins.imageData) {
+    document.getElementById('preview-img').src = ins.imageData;
+    document.getElementById('upload-placeholder').style.display = 'none';
+    document.getElementById('preview-wrap').style.display = 'block';
+    document.getElementById('upload-zone').style.cursor = 'default';
+  }
+
+  // Category
+  document.querySelectorAll('#category-pills .pill').forEach(p => {
+    if (p.textContent.trim() === ins.category) p.classList.add('selected');
+    else p.classList.remove('selected');
+  });
+
+  // Tags
+  renderTags();
+
+  // AI results
+  if (ins.aiResult) {
+    const panel = document.getElementById('ai-panel');
+    panel.classList.add('visible');
+    renderAIResults(ins.aiResult, document.getElementById('ai-results'));
+  }
+
+  // Delete old entry so saving creates a fresh one
+  state.inspirations = state.inspirations.filter(i => i.id !== id);
+  saveToStorage();
+  updateCountBadge();
+
+  switchTab('add');
+  toast('Inspiration loaded for editing. Save to update.', 'success');
+}
+
+function deleteInspiration(id) {
+  const ins = state.inspirations.find(i => i.id === id);
+  if (!ins) return;
+  if (!confirm(`Delete "${ins.title}"? This cannot be undone.`)) return;
+  state.inspirations = state.inspirations.filter(i => i.id !== id);
+  saveToStorage();
+  updateCountBadge();
+  closeDetail();
+  renderBook();
+  toast(`"${ins.title}" deleted`, 'error');
+}
+
+// ─────────────────────────────────────────
+//  SETTINGS
+// ─────────────────────────────────────────
+function openSettings() {
+  const key = localStorage.getItem('anthropicApiKey');
+  if (key) document.getElementById('api-key-input').value = key;
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function closeSettingsOnOverlay(e) { if (e.target === document.getElementById('settings-modal')) closeSettings(); }
+
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) { showKeyStatus(false, 'Please enter an API key'); return; }
+  if (!key.startsWith('sk-ant-')) { showKeyStatus(false, 'API key should start with sk-ant-'); return; }
+  localStorage.setItem('anthropicApiKey', key);
+  showKeyStatus(true);
+  toast('API key saved!', 'success');
+}
+
+function showKeyStatus(ok, msg) {
+  const el = document.getElementById('key-status');
+  if (!el) return;
+  if (ok) { el.className = 'key-status ok'; el.textContent = '✓ API key saved'; }
+  else { el.className = 'key-status err'; el.textContent = '✕ ' + (msg || 'No key saved'); }
+}
+
+function exportData() {
+  const data = JSON.stringify(state.inspirations, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `recipe-inspirations-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('Invalid format');
+      state.inspirations = [...data, ...state.inspirations];
+      saveToStorage(); updateCountBadge(); renderBook();
+      toast(`Imported ${data.length} inspiration(s)!`, 'success');
+    } catch(err) { toast('Import failed: ' + err.message, 'error'); }
+  };
+  reader.readAsText(file);
+}
+function clearAllData() {
+  if (!confirm('Delete ALL inspirations? This cannot be undone!')) return;
+  state.inspirations = [];
+  saveToStorage(); updateCountBadge(); renderBook();
+  toast('All data cleared', 'error');
+}
+
+// ─────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────
+function saveToStorage() { localStorage.setItem('recipeInspirations', JSON.stringify(state.inspirations)); }
+function updateCountBadge() { document.getElementById('count-badge').textContent = state.inspirations.length; }
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg, type) {
+  const el = document.createElement('div');
+  el.className = `toast${type ? ' ' + type : ''}`;
+  el.textContent = msg;
+  const container = document.getElementById('toast-container');
+  container.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 3000);
+}
+</script>
+</body>
+</html>
