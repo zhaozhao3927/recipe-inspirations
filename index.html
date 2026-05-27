@@ -450,6 +450,13 @@
   }
   .key-status.ok { color: var(--sage); }
   .key-status.err { color: #c0392b; }
+  .app-version-pill {
+    display: inline-block;
+    font-size: .82rem; font-weight: 700; color: var(--ink-md);
+    background: var(--parchment); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
 
   /* ══════════════════════════════════
      TOAST
@@ -749,6 +756,31 @@
           <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️ Clear All Data</button>
         </div>
       </div>
+
+      <div class="settings-section">
+        <div class="settings-label">Cloud Sync (Supabase)</div>
+        <div class="settings-desc">Store your cookbook in the cloud so it works across phone and laptop. Enter your Supabase project URL and anon key.</div>
+        <div class="field">
+          <label for="supabase-url-input">Supabase URL</label>
+          <input type="text" id="supabase-url-input" placeholder="https://xxxx.supabase.co" />
+        </div>
+        <div class="field">
+          <label for="supabase-anon-key-input">Supabase Anon Key</label>
+          <input type="text" id="supabase-anon-key-input" placeholder="eyJhbGciOi..." />
+        </div>
+        <div class="flex-gap">
+          <button class="btn btn-primary btn-sm" onclick="saveCloudSettings()">Save Cloud Settings</button>
+          <button class="btn btn-secondary btn-sm" onclick="testCloudConnection()">Test Connection</button>
+          <button class="btn btn-secondary btn-sm" onclick="syncLocalToCloud()">Sync Local → Cloud</button>
+        </div>
+        <div class="key-status" id="cloud-status">Cloud status: local only</div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">App Version</div>
+        <div class="settings-desc">Compare this on phone and laptop. If versions differ, clear site data and refresh.</div>
+        <div class="app-version-pill" id="app-version">v—</div>
+      </div>
     </div>
   </div>
 </div>
@@ -756,7 +788,11 @@
 <!-- ═══════════ TOAST ═══════════ -->
 <div class="toast-container" id="toast-container"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// Bump this when you deploy UI/feature changes.
+const APP_VERSION = '1.4.0';
+
 // ─────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────
@@ -767,20 +803,28 @@ let state = {
   currentCategory: null,
   currentAI: null,
   activeFilter: 'all',
+  storageMode: 'local',  // local | cloud
+  editingId: null,
 };
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;      // max original file accepted from picker
 const MAX_STORED_IMAGE_BYTES = 850 * 1024;      // target compressed size to fit localStorage
+const CLOUD_URL_KEY = 'supabaseUrl';
+const CLOUD_ANON_KEY = 'supabaseAnonKey';
+let supabaseClient = null;
 
 // ─────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────
-(function init() {
+(async function init() {
   const saved = localStorage.getItem('recipeInspirations');
   if (saved) {
     try { state.inspirations = JSON.parse(saved); } catch(e) {}
   }
+  await loadDataSource();
   updateCountBadge();
   renderBook();
+  document.getElementById('app-version').textContent = `v${APP_VERSION}`;
+  hydrateCloudSettingsUI();
 
   // Load saved API key into settings input
   const key = localStorage.getItem('anthropicApiKey');
@@ -810,6 +854,24 @@ const MAX_STORED_IMAGE_BYTES = 850 * 1024;      // target compressed size to fit
     });
   }
 })();
+
+async function loadDataSource() {
+  if (!hasCloudConfig()) {
+    state.storageMode = 'local';
+    return;
+  }
+  try {
+    await testCloudConnection(true);
+    const cloudRows = await fetchCloudInspirations();
+    state.inspirations = cloudRows;
+    state.storageMode = 'cloud';
+    saveToStorage();
+  } catch (err) {
+    console.error(err);
+    state.storageMode = 'local';
+    toast(`Cloud unavailable, using local data (${err.message})`, 'error');
+  }
+}
 
 // ─────────────────────────────────────────
 //  TAB SWITCHING
@@ -1118,14 +1180,14 @@ function renderAIResults(ai, container) {
 // ─────────────────────────────────────────
 //  SAVE INSPIRATION
 // ─────────────────────────────────────────
-function saveInspiration() {
+async function saveInspiration() {
   const title = document.getElementById('inp-title').value.trim();
   const where = document.getElementById('inp-where').value.trim();
   const notes = document.getElementById('inp-notes').value.trim();
   if (!title) { toast('Please enter a title for this inspiration', 'error'); return; }
 
   const inspiration = {
-    id: Date.now().toString(),
+    id: state.editingId || Date.now().toString(),
     title,
     where,
     category: state.currentCategory || '✨ Other',
@@ -1136,10 +1198,19 @@ function saveInspiration() {
     createdAt: new Date().toISOString(),
   };
 
-  state.inspirations.unshift(inspiration);
+  state.inspirations = [inspiration, ...state.inspirations.filter(i => i.id !== inspiration.id)];
   saveToStorage();
+  if (state.storageMode === 'cloud') {
+    try {
+      await upsertCloudInspiration(inspiration);
+    } catch (err) {
+      console.error(err);
+      toast(`Saved locally, cloud sync failed (${err.message})`, 'error');
+    }
+  }
   clearForm();
   updateCountBadge();
+  renderBook();
   toast(`"${title}" saved to your Recipe Book!`, 'success');
 }
 
@@ -1147,6 +1218,7 @@ function saveInspiration() {
 //  CLEAR FORM
 // ─────────────────────────────────────────
 function clearForm() {
+  state.editingId = null;
   document.getElementById('inp-title').value = '';
   document.getElementById('inp-where').value = '';
   document.getElementById('inp-notes').value = '';
@@ -1371,22 +1443,26 @@ function editInspiration(id) {
     panel.classList.add('visible');
     renderAIResults(ins.aiResult, document.getElementById('ai-results'));
   }
-
-  // Delete old entry so saving creates a fresh one
-  state.inspirations = state.inspirations.filter(i => i.id !== id);
-  saveToStorage();
-  updateCountBadge();
+  state.editingId = id;
 
   switchTab('add');
   toast('Inspiration loaded for editing. Save to update.', 'success');
 }
 
-function deleteInspiration(id) {
+async function deleteInspiration(id) {
   const ins = state.inspirations.find(i => i.id === id);
   if (!ins) return;
   if (!confirm(`Delete "${ins.title}"? This cannot be undone.`)) return;
   state.inspirations = state.inspirations.filter(i => i.id !== id);
   saveToStorage();
+  if (state.storageMode === 'cloud') {
+    try {
+      await deleteCloudInspiration(id);
+    } catch (err) {
+      console.error(err);
+      toast(`Deleted locally, cloud delete failed (${err.message})`, 'error');
+    }
+  }
   updateCountBadge();
   closeDetail();
   renderBook();
@@ -1399,6 +1475,7 @@ function deleteInspiration(id) {
 function openSettings() {
   const key = localStorage.getItem('anthropicApiKey');
   if (key) document.getElementById('api-key-input').value = key;
+  hydrateCloudSettingsUI();
   document.getElementById('settings-modal').classList.add('open');
 }
 function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
@@ -1418,6 +1495,146 @@ function showKeyStatus(ok, msg) {
   if (!el) return;
   if (ok) { el.className = 'key-status ok'; el.textContent = '✓ API key saved'; }
   else { el.className = 'key-status err'; el.textContent = '✕ ' + (msg || 'No key saved'); }
+}
+
+function getCloudConfig() {
+  return {
+    url: (localStorage.getItem(CLOUD_URL_KEY) || '').trim(),
+    anonKey: (localStorage.getItem(CLOUD_ANON_KEY) || '').trim(),
+  };
+}
+
+function hasCloudConfig() {
+  const cfg = getCloudConfig();
+  return Boolean(cfg.url && cfg.anonKey);
+}
+
+function hydrateCloudSettingsUI() {
+  const cfg = getCloudConfig();
+  const urlInput = document.getElementById('supabase-url-input');
+  const keyInput = document.getElementById('supabase-anon-key-input');
+  if (urlInput) urlInput.value = cfg.url;
+  if (keyInput) keyInput.value = cfg.anonKey;
+  setCloudStatus(state.storageMode === 'cloud', state.storageMode === 'cloud' ? 'Connected' : 'Local only');
+}
+
+function setCloudStatus(ok, message) {
+  const el = document.getElementById('cloud-status');
+  if (!el) return;
+  el.className = ok ? 'key-status ok' : 'key-status err';
+  el.textContent = `${ok ? '✓' : '✕'} Cloud status: ${message}`;
+}
+
+function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  const cfg = getCloudConfig();
+  if (!cfg.url || !cfg.anonKey) throw new Error('Missing Supabase URL or anon key');
+  if (!window.supabase || !window.supabase.createClient) throw new Error('Supabase SDK not loaded');
+  supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+  return supabaseClient;
+}
+
+function normalizeCloudRow(row) {
+  return {
+    id: String(row.id),
+    title: row.title || '',
+    where: row.where_text || '',
+    category: row.category || '✨ Other',
+    notes: row.notes || '',
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    imageData: row.image_data || null,
+    aiResult: row.ai_result || null,
+    createdAt: row.created_at || new Date().toISOString(),
+  };
+}
+
+function mapInspirationToCloud(ins) {
+  return {
+    id: String(ins.id),
+    title: ins.title || '',
+    where_text: ins.where || '',
+    category: ins.category || '✨ Other',
+    notes: ins.notes || '',
+    tags: Array.isArray(ins.tags) ? ins.tags : [],
+    image_data: ins.imageData || null,
+    ai_result: ins.aiResult || null,
+    created_at: ins.createdAt || new Date().toISOString(),
+  };
+}
+
+async function fetchCloudInspirations() {
+  const client = getSupabaseClient();
+  const { data, error } = await client
+    .from('inspirations')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data || []).map(normalizeCloudRow);
+}
+
+async function upsertCloudInspiration(inspiration) {
+  const client = getSupabaseClient();
+  const { error } = await client
+    .from('inspirations')
+    .upsert(mapInspirationToCloud(inspiration));
+  if (error) throw new Error(error.message);
+}
+
+async function deleteCloudInspiration(id) {
+  const client = getSupabaseClient();
+  const { error } = await client.from('inspirations').delete().eq('id', String(id));
+  if (error) throw new Error(error.message);
+}
+
+async function overwriteCloudFromLocal() {
+  const client = getSupabaseClient();
+  const { error: delErr } = await client.from('inspirations').delete().neq('id', '');
+  if (delErr) throw new Error(delErr.message);
+  if (!state.inspirations.length) return;
+  const rows = state.inspirations.map(mapInspirationToCloud);
+  const { error: insErr } = await client.from('inspirations').insert(rows);
+  if (insErr) throw new Error(insErr.message);
+}
+
+async function saveCloudSettings() {
+  const url = document.getElementById('supabase-url-input').value.trim();
+  const anonKey = document.getElementById('supabase-anon-key-input').value.trim();
+  if (!url || !anonKey) {
+    setCloudStatus(false, 'Please enter URL and anon key');
+    return;
+  }
+  localStorage.setItem(CLOUD_URL_KEY, url);
+  localStorage.setItem(CLOUD_ANON_KEY, anonKey);
+  supabaseClient = null;
+  await testCloudConnection();
+  toast('Cloud settings saved', 'success');
+}
+
+async function testCloudConnection(silent) {
+  try {
+    const rows = await fetchCloudInspirations();
+    state.storageMode = 'cloud';
+    setCloudStatus(true, `Connected (${rows.length} cloud entries)`);
+    if (!silent) toast('Cloud connection successful', 'success');
+  } catch (err) {
+    state.storageMode = 'local';
+    setCloudStatus(false, err.message);
+    if (!silent) toast(`Cloud connection failed: ${err.message}`, 'error');
+    throw err;
+  }
+}
+
+async function syncLocalToCloud() {
+  try {
+    await testCloudConnection(true);
+    await overwriteCloudFromLocal();
+    setCloudStatus(true, `Synced ${state.inspirations.length} entries`);
+    toast('Local data synced to cloud', 'success');
+  } catch (err) {
+    console.error(err);
+    setCloudStatus(false, err.message);
+    toast(`Sync failed: ${err.message}`, 'error');
+  }
 }
 
 function exportData() {
@@ -1442,10 +1659,19 @@ function importData(e) {
   };
   reader.readAsText(file);
 }
-function clearAllData() {
+async function clearAllData() {
   if (!confirm('Delete ALL inspirations? This cannot be undone!')) return;
   state.inspirations = [];
-  saveToStorage(); updateCountBadge(); renderBook();
+  saveToStorage();
+  if (state.storageMode === 'cloud') {
+    try {
+      await overwriteCloudFromLocal();
+    } catch (err) {
+      console.error(err);
+      toast(`Cleared locally, cloud clear failed (${err.message})`, 'error');
+    }
+  }
+  updateCountBadge(); renderBook();
   toast('All data cleared', 'error');
 }
 
