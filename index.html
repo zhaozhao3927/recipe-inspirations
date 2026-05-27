@@ -826,7 +826,7 @@ let supabaseClient = null;
 // ─────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────
-(async function init() {
+async function init() {
   const saved = localStorage.getItem('recipeInspirations');
   if (saved) {
     try { state.inspirations = JSON.parse(saved); } catch(e) {}
@@ -867,7 +867,15 @@ let supabaseClient = null;
 
   await initAuthState();
   subscribeAuthChanges();
-})();
+  await loadInspirations();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  init().catch(err => {
+    console.error(err);
+    toast(`Init failed: ${err.message}`, 'error');
+  });
+});
 
 async function loadDataSource() {
   const localRows = [...state.inspirations];
@@ -1617,6 +1625,7 @@ async function initAuthState() {
     setAuthStatus(Boolean(state.user), state.user ? `Signed in as ${state.user.email || 'user'}` : 'Not signed in');
     if (state.user) {
       await loadDataSource();
+      await loadInspirations();
       updateCountBadge();
       renderBook();
     } else {
@@ -1639,6 +1648,7 @@ function subscribeAuthChanges() {
       setAuthStatus(Boolean(state.user), state.user ? `Signed in as ${state.user.email || 'user'}` : 'Not signed in');
       if (state.user) {
         await loadDataSource();
+        await loadInspirations();
       } else {
         state.inspirations = [];
         state.storageMode = hasCloudConfig() ? 'cloud' : 'local';
@@ -1738,6 +1748,31 @@ async function fetchCloudInspirations() {
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
   return (data || []).map(normalizeCloudRow);
+}
+
+function setInspirations(items) {
+  state.inspirations = Array.isArray(items) ? items : [];
+  saveToStorage();
+  updateCountBadge();
+  renderBook();
+}
+
+async function loadInspirations() {
+  if (!hasCloudConfig() || !state.user) return;
+
+  const client = getSupabaseClient();
+  const { data, error } = await client
+    .from('inspirations')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error(error);
+    toast(`Load failed: ${error.message}`, 'error');
+    return;
+  }
+
+  setInspirations((data || []).map(normalizeCloudRow));
 }
 
 async function upsertCloudInspiration(inspiration) {
