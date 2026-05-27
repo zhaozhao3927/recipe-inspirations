@@ -1,5 +1,5 @@
-# recipe-inspirations
-Personal recipe inspiration book
+# KitchenKopyKat
+Personal kitchen copycat recipe book
 
 ## Cloud setup (Supabase)
 
@@ -7,7 +7,7 @@ Personal recipe inspiration book
 2. In Supabase SQL editor, run `supabase-schema.sql` from this repo.
 3. In Supabase:
    - Authentication -> Providers -> enable Google
-   - Add your site URL as an allowed redirect URL (for example `https://zhaozhao3927.github.io/recipe-inspirations/`)
+   - Add your site URL as an allowed redirect URL (for example `https://zhaozhao3927.github.io/KitchenKopyKat/`)
 4. Copy:
    - Project URL (`https://<project>.supabase.co`)
    - Project anon key

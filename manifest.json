@@ -1,7 +1,7 @@
 {
-  "name": "Recipe Inspirations",
-  "short_name": "Recipes",
-  "description": "Personal recipe inspiration book with notes, tags, photos, and AI analysis.",
+  "name": "KitchenKopyKat",
+  "short_name": "KopyKat",
+  "description": "KitchenKopyKat recipe notebook with notes, tags, photos, and AI analysis.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

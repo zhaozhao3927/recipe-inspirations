@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#c4714a" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<title>Recipe Inspirations</title>
+<title>KitchenKopyKat</title>
 <link rel="manifest" href="manifest.json" />
 <style>
   /* ── Reset & Base ── */
@@ -560,7 +560,7 @@
   <div class="logo">
     <span class="logo-icon">🍽️</span>
     <div>
-      Recipe Inspirations
+      KitchenKopyKat
       <span class="logo-sub">Your personal culinary idea book</span>
     </div>
   </div>
@@ -827,7 +827,7 @@ let supabaseClient = null;
 //  INIT
 // ─────────────────────────────────────────
 async function init() {
-  const saved = localStorage.getItem('recipeInspirations');
+  const saved = localStorage.getItem('kitchenKopyKatEntries') || localStorage.getItem('recipeInspirations');
   if (saved) {
     try { state.inspirations = JSON.parse(saved); } catch(e) {}
   }
@@ -1672,7 +1672,7 @@ async function signInWithGoogle() {
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://zhaozhao3927.github.io/recipe-inspirations/',
+        redirectTo: 'https://zhaozhao3927.github.io/KitchenKopyKat/',
       },
     });
     if (error) throw error;
@@ -1877,7 +1877,7 @@ function exportData() {
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url;
-  a.download = `recipe-inspirations-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `kitchen-kopy-kat-${new Date().toISOString().slice(0,10)}.json`;
   a.click(); URL.revokeObjectURL(url);
 }
 function importData(e) {
@@ -1916,7 +1916,7 @@ async function clearAllData() {
 // ─────────────────────────────────────────
 function saveToStorage() {
   try {
-    localStorage.setItem('recipeInspirations', JSON.stringify(state.inspirations));
+    localStorage.setItem('kitchenKopyKatEntries', JSON.stringify(state.inspirations));
   } catch (err) {
     toast('Storage is full. Remove some entries/photos and try again.', 'error');
     throw err;

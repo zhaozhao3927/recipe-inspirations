@@ -1,4 +1,4 @@
-const CACHE_NAME = "recipe-inspirations-v10";
+const CACHE_NAME = "kitchen-kopy-kat-v1";
 const APP_SHELL = [
   "./manifest.json",
   "./icon.svg"
