@@ -1,7 +1,5 @@
-const CACHE_NAME = "recipe-inspirations-v2";
+const CACHE_NAME = "recipe-inspirations-v3";
 const APP_SHELL = [
-  "./",
-  "./index.html",
   "./manifest.json",
   "./icon.svg"
 ];
@@ -26,9 +24,31 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
+function isHtmlRequest(request) {
+  if (request.mode === "navigate") return true;
+  const url = new URL(request.url);
+  return url.pathname.endsWith("/") ||
+    url.pathname.endsWith("/index.html") ||
+    url.pathname.endsWith(".html");
+}
+
 self.addEventListener("fetch", event => {
   const { request } = event;
   if (request.method !== "GET") return;
+
+  // Always fetch latest HTML so users see updates after deploy.
+  if (isHtmlRequest(request)) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          const cloned = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, cloned));
+          return response;
+        })
+        .catch(() => caches.match(request).then(cached => cached || caches.match("./index.html")))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request).then(cached => {
@@ -38,6 +58,6 @@ self.addEventListener("fetch", event => {
         caches.open(CACHE_NAME).then(cache => cache.put(request, cloned));
         return response;
       });
-    }).catch(() => caches.match("./index.html"))
+    })
   );
 });
