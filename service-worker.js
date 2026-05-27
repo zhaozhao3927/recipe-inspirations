@@ -1,4 +1,4 @@
-const CACHE_NAME = "recipe-inspirations-v8";
+const CACHE_NAME = "recipe-inspirations-v9";
 const APP_SHELL = [
   "./manifest.json",
   "./icon.svg"

@@ -1633,12 +1633,16 @@ async function overwriteCloudFromLocal() {
 
 async function overwriteCloudFromRows(rows) {
   const client = getSupabaseClient();
-  const { error: delErr } = await client.from('inspirations').delete().neq('id', '');
-  if (delErr) throw new Error(delErr.message);
   if (!rows.length) return;
   const cloudRows = rows.map(mapInspirationToCloud);
-  const { error: insErr } = await client.from('inspirations').insert(cloudRows);
+  const { error: insErr } = await client.from('inspirations').upsert(cloudRows);
   if (insErr) throw new Error(insErr.message);
+}
+
+async function clearCloudRows() {
+  const client = getSupabaseClient();
+  const { error } = await client.from('inspirations').delete().neq('id', '');
+  if (error) throw new Error(error.message);
 }
 
 async function saveCloudSettings() {
@@ -1716,7 +1720,7 @@ async function clearAllData() {
   saveToStorage();
   if (state.storageMode === 'cloud') {
     try {
-      await overwriteCloudFromLocal();
+      await clearCloudRows();
     } catch (err) {
       console.error(err);
       toast(`Cleared locally, cloud clear failed (${err.message})`, 'error');
