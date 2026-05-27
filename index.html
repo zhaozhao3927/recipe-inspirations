@@ -143,8 +143,14 @@
     background: #fdeee6;
   }
   .upload-zone input[type=file] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    width: 100%; height: 100%; z-index: 2;
+    font-size: 16px; /* prevents iOS focus quirks on invisible inputs */
   }
+  .upload-zone.has-image input[type=file] { display: none; }
+  #upload-placeholder { pointer-events: none; position: relative; z-index: 1; }
+  .preview-wrap { pointer-events: none; z-index: 1; }
+  .preview-remove { pointer-events: auto; z-index: 3; }
   .upload-icon { font-size: 2.4rem; }
   .upload-hint { color: var(--ink-lt); font-size: .88rem; }
   .upload-hint strong { color: var(--terracotta); }
@@ -570,13 +576,13 @@
           <div class="card-title"><span class="card-title-icon">📸</span> Photo & Details</div>
 
           <!-- Upload zone -->
-          <div id="upload-zone" class="upload-zone" onclick="triggerUpload()">
-            <input type="file" id="file-input" accept="image/*,.heic,.heif" onchange="handleFileSelect(event)" />
+          <div id="upload-zone" class="upload-zone">
+            <input type="file" id="file-input" accept="image/*,.heic,.heif" />
             <div id="upload-placeholder">
               <div class="upload-icon">🖼️</div>
               <div class="upload-hint">
-                <strong>Click to upload</strong> or drag &amp; drop<br>
-                JPG, PNG, WEBP, GIF — up to 10 MB
+                <strong>Tap to upload</strong> from gallery or camera<br>
+                JPG, PNG, WEBP, HEIC — up to 20 MB
               </div>
             </div>
             <div id="preview-wrap" class="preview-wrap" style="display:none; width:100%;">
@@ -780,8 +786,10 @@ const MAX_STORED_IMAGE_BYTES = 850 * 1024;      // target compressed size to fit
   zone.addEventListener('drop', e => {
     e.preventDefault(); zone.classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) loadImageFile(file);
+    if (file && isImageFile(file)) loadImageFile(file);
   });
+
+  document.getElementById('file-input').addEventListener('change', handleFileSelect);
 
   // PWA: register service worker for install/offline app shell.
   if ('serviceWorker' in navigator) {
@@ -807,15 +815,42 @@ function switchTab(tab) {
 // ─────────────────────────────────────────
 //  IMAGE UPLOAD
 // ─────────────────────────────────────────
-function triggerUpload() {
-  if (!state.currentImage) document.getElementById('file-input').click();
+function getFileExt(name) {
+  const dot = String(name || '').lastIndexOf('.');
+  return dot >= 0 ? name.slice(dot + 1).toLowerCase() : '';
 }
+
+const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp', 'avif']);
+
+function isImageFile(file) {
+  if (!file) return false;
+  if (file.type && file.type.startsWith('image/')) return true;
+  const ext = getFileExt(file.name);
+  return IMAGE_EXTENSIONS.has(ext);
+}
+
+function isHeicFile(file) {
+  const ext = getFileExt(file.name);
+  return ext === 'heic' || ext === 'heif' || file.type === 'image/heic' || file.type === 'image/heif';
+}
+
+function setUploadPreviewVisible(hasImage) {
+  const zone = document.getElementById('upload-zone');
+  zone.classList.toggle('has-image', hasImage);
+  document.getElementById('upload-placeholder').style.display = hasImage ? 'none' : '';
+  document.getElementById('preview-wrap').style.display = hasImage ? 'block' : 'none';
+  zone.style.cursor = hasImage ? 'default' : 'pointer';
+}
+
 function handleFileSelect(e) {
-  const file = e.target.files[0];
+  const input = e.target;
+  const file = input.files && input.files[0];
+  input.value = '';
   if (file) loadImageFile(file);
 }
+
 async function loadImageFile(file) {
-  if (!file || !file.type.startsWith('image/')) {
+  if (!isImageFile(file)) {
     toast('Please choose a valid image file', 'error');
     return;
   }
@@ -828,9 +863,7 @@ async function loadImageFile(file) {
     const imageDataUrl = await readAndCompressImage(file);
     state.currentImage = imageDataUrl;
     document.getElementById('preview-img').src = state.currentImage;
-    document.getElementById('upload-placeholder').style.display = 'none';
-    document.getElementById('preview-wrap').style.display = 'block';
-    document.getElementById('upload-zone').style.cursor = 'default';
+    setUploadPreviewVisible(true);
   } catch (err) {
     console.error(err);
     toast(`Could not process this photo (${err.message})`, 'error');
@@ -866,8 +899,7 @@ async function readAndCompressImage(file) {
 
   // Keep formats that are tricky or unsupported in canvas pipelines as-is.
   // This improves compatibility for phone formats like HEIC/HEIF.
-  const passthroughTypes = ['image/gif', 'image/heic', 'image/heif'];
-  if (passthroughTypes.includes(file.type)) return originalDataUrl;
+  if (file.type === 'image/gif' || isHeicFile(file)) return originalDataUrl;
 
   // If already small enough, keep original to avoid unnecessary conversions.
   if (dataUrlByteLength(originalDataUrl) <= MAX_STORED_IMAGE_BYTES) return originalDataUrl;
@@ -900,9 +932,7 @@ function removeImage(e) {
   e.stopPropagation();
   state.currentImage = null;
   document.getElementById('preview-img').src = '';
-  document.getElementById('upload-placeholder').style.display = '';
-  document.getElementById('preview-wrap').style.display = 'none';
-  document.getElementById('upload-zone').style.cursor = 'pointer';
+  setUploadPreviewVisible(false);
   document.getElementById('file-input').value = '';
 }
 
@@ -1295,9 +1325,9 @@ function editInspiration(id) {
   // Set image
   if (ins.imageData) {
     document.getElementById('preview-img').src = ins.imageData;
-    document.getElementById('upload-placeholder').style.display = 'none';
-    document.getElementById('preview-wrap').style.display = 'block';
-    document.getElementById('upload-zone').style.cursor = 'default';
+    setUploadPreviewVisible(true);
+  } else {
+    setUploadPreviewVisible(false);
   }
 
   // Category
