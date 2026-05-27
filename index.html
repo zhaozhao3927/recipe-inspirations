@@ -1199,19 +1199,32 @@ async function saveInspiration() {
   };
 
   state.inspirations = [inspiration, ...state.inspirations.filter(i => i.id !== inspiration.id)];
-  saveToStorage();
-  if (state.storageMode === 'cloud') {
+  const cloudEnabled = hasCloudConfig();
+  if (cloudEnabled) {
     try {
       await upsertCloudInspiration(inspiration);
+      state.inspirations = await fetchCloudInspirations();
+      state.storageMode = 'cloud';
+      setCloudStatus(true, `Connected (${state.inspirations.length} cloud entries)`);
+      saveToStorage();
     } catch (err) {
       console.error(err);
-      toast(`Saved locally, cloud sync failed (${err.message})`, 'error');
+      state.storageMode = 'local';
+      setCloudStatus(false, err.message);
+      saveToStorage();
+      clearForm();
+      updateCountBadge();
+      renderBook();
+      toast(`Saved locally only. Cloud sync failed (${err.message})`, 'error');
+      return;
     }
+  } else {
+    saveToStorage();
   }
   clearForm();
   updateCountBadge();
   renderBook();
-  toast(`"${title}" saved to your Recipe Book!`, 'success');
+  toast(`"${title}" saved${cloudEnabled ? ' and synced to cloud' : ' to your Recipe Book'}!`, 'success');
 }
 
 // ─────────────────────────────────────────
@@ -1454,14 +1467,27 @@ async function deleteInspiration(id) {
   if (!ins) return;
   if (!confirm(`Delete "${ins.title}"? This cannot be undone.`)) return;
   state.inspirations = state.inspirations.filter(i => i.id !== id);
-  saveToStorage();
-  if (state.storageMode === 'cloud') {
+  const cloudEnabled = hasCloudConfig();
+  if (cloudEnabled) {
     try {
       await deleteCloudInspiration(id);
+      state.inspirations = await fetchCloudInspirations();
+      state.storageMode = 'cloud';
+      setCloudStatus(true, `Connected (${state.inspirations.length} cloud entries)`);
+      saveToStorage();
     } catch (err) {
       console.error(err);
-      toast(`Deleted locally, cloud delete failed (${err.message})`, 'error');
+      state.storageMode = 'local';
+      setCloudStatus(false, err.message);
+      saveToStorage();
+      updateCountBadge();
+      closeDetail();
+      renderBook();
+      toast(`Deleted locally only. Cloud delete failed (${err.message})`, 'error');
+      return;
     }
+  } else {
+    saveToStorage();
   }
   updateCountBadge();
   closeDetail();
@@ -1628,6 +1654,10 @@ async function syncLocalToCloud() {
   try {
     await testCloudConnection(true);
     await overwriteCloudFromLocal();
+    state.inspirations = await fetchCloudInspirations();
+    saveToStorage();
+    renderBook();
+    updateCountBadge();
     setCloudStatus(true, `Synced ${state.inspirations.length} entries`);
     toast('Local data synced to cloud', 'success');
   } catch (err) {
