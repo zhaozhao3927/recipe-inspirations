@@ -571,7 +571,7 @@
 
           <!-- Upload zone -->
           <div id="upload-zone" class="upload-zone" onclick="triggerUpload()">
-            <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)" />
+            <input type="file" id="file-input" accept="image/*,.heic,.heif" onchange="handleFileSelect(event)" />
             <div id="upload-placeholder">
               <div class="upload-icon">🖼️</div>
               <div class="upload-hint">
@@ -752,6 +752,8 @@ let state = {
   currentAI: null,
   activeFilter: 'all',
 };
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;      // max original file accepted from picker
+const MAX_STORED_IMAGE_BYTES = 850 * 1024;      // target compressed size to fit localStorage
 
 // ─────────────────────────────────────────
 //  INIT
@@ -812,17 +814,87 @@ function handleFileSelect(e) {
   const file = e.target.files[0];
   if (file) loadImageFile(file);
 }
-function loadImageFile(file) {
-  if (file.size > 10 * 1024 * 1024) { toast('Image is too large (max 10 MB)', 'error'); return; }
-  const reader = new FileReader();
-  reader.onload = ev => {
-    state.currentImage = ev.target.result;
+async function loadImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    toast('Please choose a valid image file', 'error');
+    return;
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    toast('Image is too large (max 20 MB)', 'error');
+    return;
+  }
+
+  try {
+    const imageDataUrl = await readAndCompressImage(file);
+    state.currentImage = imageDataUrl;
     document.getElementById('preview-img').src = state.currentImage;
     document.getElementById('upload-placeholder').style.display = 'none';
     document.getElementById('preview-wrap').style.display = 'block';
     document.getElementById('upload-zone').style.cursor = 'default';
-  };
-  reader.readAsDataURL(file);
+  } catch (err) {
+    console.error(err);
+    toast(`Could not process this photo (${err.message})`, 'error');
+  }
+}
+
+function dataUrlByteLength(dataUrl) {
+  const base64 = dataUrl.split(',')[1] || '';
+  const padding = (base64.match(/=*$/) || [''])[0].length;
+  return Math.floor((base64.length * 3) / 4) - padding;
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImageElement(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Image decode failed'));
+    img.src = src;
+  });
+}
+
+async function readAndCompressImage(file) {
+  const originalDataUrl = await fileToDataUrl(file);
+
+  // Keep formats that are tricky or unsupported in canvas pipelines as-is.
+  // This improves compatibility for phone formats like HEIC/HEIF.
+  const passthroughTypes = ['image/gif', 'image/heic', 'image/heif'];
+  if (passthroughTypes.includes(file.type)) return originalDataUrl;
+
+  // If already small enough, keep original to avoid unnecessary conversions.
+  if (dataUrlByteLength(originalDataUrl) <= MAX_STORED_IMAGE_BYTES) return originalDataUrl;
+
+  // Only recompress canvas-safe formats.
+  const compressibleTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (!compressibleTypes.includes(file.type)) return originalDataUrl;
+
+  const img = await loadImageElement(originalDataUrl);
+  const maxDimension = 1600;
+  const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
+  const width = Math.max(1, Math.round(img.width * scale));
+  const height = Math.max(1, Math.round(img.height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, width, height);
+
+  let quality = 0.9;
+  let out = canvas.toDataURL('image/jpeg', quality);
+  while (dataUrlByteLength(out) > MAX_STORED_IMAGE_BYTES && quality > 0.45) {
+    quality -= 0.1;
+    out = canvas.toDataURL('image/jpeg', quality);
+  }
+  return out;
 }
 function removeImage(e) {
   e.stopPropagation();
@@ -1324,7 +1396,14 @@ function clearAllData() {
 // ─────────────────────────────────────────
 //  HELPERS
 // ─────────────────────────────────────────
-function saveToStorage() { localStorage.setItem('recipeInspirations', JSON.stringify(state.inspirations)); }
+function saveToStorage() {
+  try {
+    localStorage.setItem('recipeInspirations', JSON.stringify(state.inspirations));
+  } catch (err) {
+    toast('Storage is full. Remove some entries/photos and try again.', 'error');
+    throw err;
+  }
+}
 function updateCountBadge() { document.getElementById('count-badge').textContent = state.inspirations.length; }
 function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
