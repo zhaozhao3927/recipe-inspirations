@@ -236,55 +236,11 @@
     border: 1.5px solid var(--border);
   }
   .btn-secondary:hover { border-color: var(--terracotta); color: var(--terracotta); background: #fdeee6; }
-  .btn-ai {
-    background: linear-gradient(135deg, #7c4dff 0%, #448aff 100%);
-    color: white;
-  }
-  .btn-ai:hover { opacity: .9; }
-  .btn-ai:disabled { opacity: .5; cursor: not-allowed; }
   .btn-sm { padding: 6px 14px; font-size: .82rem; }
   .btn-danger { background: #fff0ee; color: #c0392b; border: 1.5px solid #f5c6c2; }
   .btn-danger:hover { background: #fde8e5; }
 
   .form-actions { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
-
-  /* AI Analysis panel */
-  .ai-panel {
-    background: linear-gradient(135deg, #f5f0ff 0%, #eff6ff 100%);
-    border: 1.5px solid #c4b5fd;
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-top: 20px;
-    display: none;
-  }
-  .ai-panel.visible { display: block; }
-  .ai-panel-title {
-    font-size: .95rem; font-weight: 700; color: #5b21b6;
-    margin-bottom: 14px; display: flex; align-items: center; gap: 7px;
-  }
-  .ai-section { margin-bottom: 14px; }
-  .ai-section-label {
-    font-size: .78rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .06em; color: #7c3aed; margin-bottom: 6px;
-  }
-  .ai-text { font-size: .88rem; color: var(--ink); line-height: 1.6; }
-  .ingredient-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .ingredient-chip {
-    background: white; border: 1px solid #c4b5fd;
-    color: #5b21b6; border-radius: 20px;
-    padding: 3px 11px; font-size: .8rem; font-weight: 500;
-  }
-  .ai-loading {
-    display: flex; align-items: center; gap: 10px;
-    color: #5b21b6; font-size: .9rem; padding: 10px 0;
-  }
-  .spinner {
-    width: 20px; height: 20px; border-radius: 50%;
-    border: 2.5px solid #c4b5fd;
-    border-top-color: #7c3aed;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ══════════════════════════════════
      RECIPE BOOK VIEW
@@ -379,12 +335,6 @@
     display: flex; justify-content: space-between; align-items: center;
   }
   .card-date { font-size: .76rem; color: var(--ink-lt); }
-  .card-ai-badge {
-    font-size: .72rem; font-weight: 700; color: #7c3aed;
-    background: #f5f0ff; border-radius: 20px; padding: 2px 9px;
-    display: flex; align-items: center; gap: 4px;
-  }
-
   /* Empty state */
   .empty-state {
     text-align: center; padding: 80px 20px; color: var(--ink-lt);
@@ -633,7 +583,7 @@
         </div>
       </div>
 
-      <!-- Right: Notes + Tags + AI -->
+      <!-- Right: Notes + Tags -->
       <div>
         <div class="card">
           <div class="card-title"><span class="card-title-icon">📝</span> Notes & Tags</div>
@@ -654,27 +604,6 @@
               />
             </div>
             <div class="tag-hint">Suggestions: spicy · umami · quick · vegetarian · fusion · comfort food</div>
-          </div>
-
-          <hr />
-
-          <!-- AI Button -->
-          <div class="form-actions">
-            <button class="btn btn-ai" onclick="analyzeWithAI()">
-              ✨ Analyze with AI
-            </button>
-            <span class="text-sm text-muted" style="align-self:center; line-height:1.4;">
-              Identify ingredients &amp; cooking process
-            </span>
-          </div>
-
-          <!-- AI Panel -->
-          <div class="ai-panel" id="ai-panel">
-            <div class="ai-loading" id="ai-loading" style="display:none">
-              <div class="spinner"></div>
-              Analyzing your dish…
-            </div>
-            <div id="ai-results"></div>
           </div>
 
           <hr />
@@ -734,21 +663,8 @@
     </div>
     <div class="settings-body">
       <div class="settings-section">
-        <div class="settings-label">Anthropic API Key</div>
-        <div class="settings-desc">
-          Required for the AI "Analyze with AI" feature. Your key is stored only in your browser (localStorage) and is never sent anywhere except directly to Anthropic's API.
-          Get one at <a href="https://console.anthropic.com" target="_blank" style="color:var(--terracotta)">console.anthropic.com</a>.
-        </div>
-        <div class="api-key-wrap">
-          <input type="password" id="api-key-input" placeholder="sk-ant-…" />
-          <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save</button>
-        </div>
-        <div class="key-status" id="key-status"></div>
-      </div>
-
-      <div class="settings-section">
         <div class="settings-label">Data Management</div>
-        <div class="settings-desc">All data is stored in your browser's localStorage — nothing leaves your device (except API calls to Anthropic).</div>
+        <div class="settings-desc">All data is stored in your browser's localStorage unless Cloud Sync is enabled.</div>
         <div class="flex-gap">
           <button class="btn btn-secondary btn-sm" onclick="exportData()">⬇️ Export JSON</button>
           <button class="btn btn-secondary btn-sm" onclick="document.getElementById('import-file').click()">⬆️ Import JSON</button>
@@ -807,11 +723,10 @@ const APP_VERSION = '1.4.0';
 //  STATE
 // ─────────────────────────────────────────
 let state = {
-  inspirations: [],      // [{id, title, where, category, notes, tags, imageData, aiResult, createdAt}]
+  inspirations: [],      // [{id, title, where, category, notes, tags, imageData, createdAt}]
   currentImage: null,    // base64 data URL
   currentTags: [],
   currentCategory: null,
-  currentAI: null,
   activeFilter: 'all',
   storageMode: 'local',  // local | cloud
   editingId: null,
@@ -836,13 +751,6 @@ async function init() {
   renderBook();
   document.getElementById('app-version').textContent = `v${APP_VERSION}`;
   hydrateCloudSettingsUI();
-
-  // Load saved API key into settings input
-  const key = localStorage.getItem('anthropicApiKey');
-  if (key) {
-    document.getElementById('api-key-input').value = key;
-    showKeyStatus(true);
-  }
 
   // Drag & drop
   const zone = document.getElementById('upload-zone');
@@ -1095,130 +1003,6 @@ function renderTags() {
 }
 
 // ─────────────────────────────────────────
-//  AI ANALYSIS
-// ─────────────────────────────────────────
-async function analyzeWithAI() {
-  const apiKey = localStorage.getItem('anthropicApiKey');
-  if (!apiKey) {
-    toast('Please add your Anthropic API key in Settings ⚙️', 'error');
-    openSettings();
-    return;
-  }
-  const notes = document.getElementById('inp-notes').value.trim();
-  const title = document.getElementById('inp-title').value.trim();
-  const where = document.getElementById('inp-where').value.trim();
-  if (!state.currentImage && !notes && !title) {
-    toast('Please upload a photo or add some notes first', 'error');
-    return;
-  }
-
-  const panel = document.getElementById('ai-panel');
-  const loading = document.getElementById('ai-loading');
-  const results = document.getElementById('ai-results');
-  panel.classList.add('visible');
-  loading.style.display = 'flex';
-  results.innerHTML = '';
-
-  // Build message content
-  const content = [];
-  if (state.currentImage) {
-    const [, mediaType, , base64] = state.currentImage.match(/^data:([^;]+)(;base64,)(.+)$/);
-    content.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } });
-  }
-
-  let textPrompt = `You are a professional chef and food expert. Analyze this dish/food inspiration and provide a structured analysis.\n\n`;
-  if (title) textPrompt += `Dish name / title: ${title}\n`;
-  if (where) textPrompt += `Where they had it: ${where}\n`;
-  if (notes) textPrompt += `User's notes: ${notes}\n`;
-  textPrompt += `\nPlease analyze and respond in exactly this JSON format (no markdown, just raw JSON):\n{
-  "ingredients": ["ingredient1", "ingredient2", ...],
-  "flavor_profile": "2-3 sentence description of flavor profile, taste balance, and what makes it special",
-  "cooking_process": "Step-by-step cooking process in 4-6 steps",
-  "recipe_variations": ["variation1", "variation2", "variation3"],
-  "pairing_suggestions": "Suggested drinks or side dishes that would complement this",
-  "difficulty": "Easy / Medium / Hard"
-}`;
-  content.push({ type: 'text', text: textPrompt });
-
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content }],
-      }),
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.error?.message || `HTTP ${resp.status}`);
-    }
-
-    const data = await resp.json();
-    let raw = data.content[0].text.trim();
-    // Strip markdown code fences if present
-    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
-
-    const ai = JSON.parse(raw);
-    state.currentAI = ai;
-    renderAIResults(ai, results);
-    loading.style.display = 'none';
-  } catch(err) {
-    loading.style.display = 'none';
-    results.innerHTML = `<div style="color:#c0392b; font-size:.88rem;">⚠️ Analysis failed: ${err.message}</div>`;
-    console.error(err);
-  }
-}
-
-function renderAIResults(ai, container) {
-  let html = `
-    <div class="ai-panel-title">✨ AI Analysis</div>
-
-    <div class="ai-section">
-      <div class="ai-section-label">🧂 Identified Ingredients</div>
-      <div class="ingredient-chips">
-        ${ai.ingredients.map(i => `<span class="ingredient-chip">${i}</span>`).join('')}
-      </div>
-    </div>
-
-    <div class="ai-section">
-      <div class="ai-section-label">👅 Flavor Profile</div>
-      <div class="ai-text">${ai.flavor_profile}</div>
-    </div>
-
-    <div class="ai-section">
-      <div class="ai-section-label">👨‍🍳 Cooking Process</div>
-      <div class="ai-text" style="white-space:pre-wrap;">${ai.cooking_process}</div>
-    </div>
-
-    <div class="ai-section">
-      <div class="ai-section-label">💡 Recipe Variations</div>
-      <div class="ingredient-chips">
-        ${ai.recipe_variations.map(v => `<span class="ingredient-chip">${v}</span>`).join('')}
-      </div>
-    </div>
-
-    <div class="ai-section">
-      <div class="ai-section-label">🍷 Pairings</div>
-      <div class="ai-text">${ai.pairing_suggestions}</div>
-    </div>
-
-    <div class="ai-section">
-      <div class="ai-section-label">⚡ Difficulty</div>
-      <div class="ai-text"><strong>${ai.difficulty}</strong></div>
-    </div>
-  `;
-  container.innerHTML = html;
-}
-
-// ─────────────────────────────────────────
 //  SAVE INSPIRATION
 // ─────────────────────────────────────────
 async function saveInspiration() {
@@ -1236,7 +1020,6 @@ async function saveInspiration() {
     notes,
     tags: [...state.currentTags],
     imageData: state.currentImage,
-    aiResult: state.currentAI,
     createdAt: new Date().toISOString(),
   };
 
@@ -1279,13 +1062,10 @@ function clearForm() {
   document.getElementById('tags-input').value = '';
   state.currentTags = [];
   state.currentCategory = null;
-  state.currentAI = null;
   state.currentImage = null;
   renderTags();
   document.querySelectorAll('#category-pills .pill').forEach(p => p.classList.remove('selected'));
   removeImage({ stopPropagation: () => {} });
-  document.getElementById('ai-panel').classList.remove('visible');
-  document.getElementById('ai-results').innerHTML = '';
 }
 
 // ─────────────────────────────────────────
@@ -1332,10 +1112,6 @@ function renderBook() {
     const tagsHtml = ins.tags.length
       ? `<div class="card-tags">${ins.tags.slice(0,4).map(t => `<span class="card-tag">${t}</span>`).join('')}${ins.tags.length > 4 ? `<span class="card-tag">+${ins.tags.length - 4}</span>` : ''}</div>`
       : '';
-    const aiBadge = ins.aiResult
-      ? `<span class="card-ai-badge">✨ AI</span>`
-      : '';
-
     return `
       <div class="recipe-card" onclick="openDetail('${ins.id}')">
         ${imgHtml}
@@ -1348,7 +1124,6 @@ function renderBook() {
         </div>
         <div class="card-footer">
           <span class="card-date">${date}</span>
-          ${aiBadge}
         </div>
       </div>`;
   }).join('');
@@ -1414,38 +1189,6 @@ function openDetail(id) {
       </div>`;
   }
 
-  if (ins.aiResult) {
-    const ai = ins.aiResult;
-    bodyHtml += `
-      <div style="background:linear-gradient(135deg,#f5f0ff,#eff6ff);border:1.5px solid #c4b5fd;border-radius:12px;padding:20px;margin-top:8px;">
-        <div class="ai-panel-title">✨ AI Analysis</div>
-        <div class="ai-section">
-          <div class="ai-section-label">🧂 Ingredients</div>
-          <div class="ingredient-chips">${ai.ingredients.map(i => `<span class="ingredient-chip">${escHtml(i)}</span>`).join('')}</div>
-        </div>
-        <div class="ai-section">
-          <div class="ai-section-label">👅 Flavor Profile</div>
-          <div class="ai-text">${escHtml(ai.flavor_profile)}</div>
-        </div>
-        <div class="ai-section">
-          <div class="ai-section-label">👨‍🍳 Cooking Process</div>
-          <div class="ai-text" style="white-space:pre-wrap;">${escHtml(ai.cooking_process)}</div>
-        </div>
-        <div class="ai-section">
-          <div class="ai-section-label">💡 Variations</div>
-          <div class="ingredient-chips">${ai.recipe_variations.map(v => `<span class="ingredient-chip">${escHtml(v)}</span>`).join('')}</div>
-        </div>
-        <div class="ai-section">
-          <div class="ai-section-label">🍷 Pairings</div>
-          <div class="ai-text">${escHtml(ai.pairing_suggestions)}</div>
-        </div>
-        <div class="ai-section">
-          <div class="ai-section-label">⚡ Difficulty</div>
-          <div class="ai-text"><strong>${escHtml(ai.difficulty)}</strong></div>
-        </div>
-      </div>`;
-  }
-
   bodyHtml += `<div style="font-size:.78rem;color:var(--ink-lt);margin-top:16px;">Saved on ${date}</div>`;
   document.getElementById('detail-body').innerHTML = bodyHtml;
 
@@ -1471,7 +1214,6 @@ function editInspiration(id) {
   document.getElementById('inp-notes').value = ins.notes;
   state.currentTags = [...ins.tags];
   state.currentCategory = ins.category;
-  state.currentAI = ins.aiResult || null;
   state.currentImage = ins.imageData || null;
 
   // Set image
@@ -1491,12 +1233,6 @@ function editInspiration(id) {
   // Tags
   renderTags();
 
-  // AI results
-  if (ins.aiResult) {
-    const panel = document.getElementById('ai-panel');
-    panel.classList.add('visible');
-    renderAIResults(ins.aiResult, document.getElementById('ai-results'));
-  }
   state.editingId = id;
 
   switchTab('add');
@@ -1540,29 +1276,11 @@ async function deleteInspiration(id) {
 //  SETTINGS
 // ─────────────────────────────────────────
 function openSettings() {
-  const key = localStorage.getItem('anthropicApiKey');
-  if (key) document.getElementById('api-key-input').value = key;
   hydrateCloudSettingsUI();
   document.getElementById('settings-modal').classList.add('open');
 }
 function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
 function closeSettingsOnOverlay(e) { if (e.target === document.getElementById('settings-modal')) closeSettings(); }
-
-function saveApiKey() {
-  const key = document.getElementById('api-key-input').value.trim();
-  if (!key) { showKeyStatus(false, 'Please enter an API key'); return; }
-  if (!key.startsWith('sk-ant-')) { showKeyStatus(false, 'API key should start with sk-ant-'); return; }
-  localStorage.setItem('anthropicApiKey', key);
-  showKeyStatus(true);
-  toast('API key saved!', 'success');
-}
-
-function showKeyStatus(ok, msg) {
-  const el = document.getElementById('key-status');
-  if (!el) return;
-  if (ok) { el.className = 'key-status ok'; el.textContent = '✓ API key saved'; }
-  else { el.className = 'key-status err'; el.textContent = '✕ ' + (msg || 'No key saved'); }
-}
 
 function getCloudConfig() {
   return {
@@ -1720,7 +1438,6 @@ function normalizeCloudRow(row) {
     notes: row.notes || '',
     tags: Array.isArray(row.tags) ? row.tags : [],
     imageData: row.image_data || null,
-    aiResult: row.ai_result || null,
     createdAt: row.created_at || new Date().toISOString(),
   };
 }
@@ -1734,7 +1451,6 @@ function mapInspirationToCloud(ins) {
     notes: ins.notes || '',
     tags: Array.isArray(ins.tags) ? ins.tags : [],
     image_data: ins.imageData || null,
-    ai_result: ins.aiResult || null,
     created_at: ins.createdAt || new Date().toISOString(),
   };
 }
