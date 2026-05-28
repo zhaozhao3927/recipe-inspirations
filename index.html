@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <title>KitchenKopyKat</title>
 <link rel="manifest" href="manifest.json" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
 <style>
   /* ── Reset & Base ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -168,6 +169,7 @@
     transition: background .15s;
   }
   .preview-remove:hover { background: rgba(196,113,74,.9); }
+  .photo-tools { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 
   /* Form fields */
   label { display: block; font-size: .85rem; font-weight: 600; color: var(--ink-md); margin-bottom: 5px; }
@@ -385,6 +387,16 @@
     border-top: 1px solid var(--border);
     display: flex; gap: 10px; flex-wrap: wrap;
   }
+  .cropper-host {
+    width: 100%;
+    min-height: 260px;
+    max-height: 62vh;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #111;
+  }
+  .cropper-host img { max-width: 100%; display: block; }
 
   /* ══════════════════════════════════
      SETTINGS MODAL
@@ -552,6 +564,9 @@
               <button class="preview-remove" onclick="removeImage(event)" title="Remove photo">✕</button>
             </div>
           </div>
+          <div class="photo-tools">
+            <button class="btn btn-secondary btn-sm" id="btn-crop" onclick="openCropModal()" style="display:none;">✂️ Crop Photo</button>
+          </div>
 
           <div style="margin-top:20px;">
             <div class="field">
@@ -654,6 +669,26 @@
   </div>
 </div>
 
+<!-- ═══════════ CROP MODAL ═══════════ -->
+<div class="modal-overlay" id="crop-modal" onclick="closeCropOnOverlay(event)">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-header">
+      <div class="modal-title">✂️ Crop Photo</div>
+      <button class="modal-close" onclick="closeCropModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-desc" style="margin-bottom:10px;">Drag to move and use handles to resize. Then apply crop.</div>
+      <div class="cropper-host">
+        <img id="crop-image" src="" alt="Crop preview" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-sm" onclick="applyCrop()">Apply Crop</button>
+      <button class="btn btn-secondary btn-sm" onclick="closeCropModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════ SETTINGS MODAL ═══════════ -->
 <div class="modal-overlay" id="settings-modal" onclick="closeSettingsOnOverlay(event)">
   <div class="modal" style="max-width:480px;">
@@ -715,6 +750,7 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script>
 // Bump this when you deploy UI/feature changes.
 const APP_VERSION = '1.4.0';
@@ -737,6 +773,7 @@ const MAX_STORED_IMAGE_BYTES = 850 * 1024;      // target compressed size to fit
 const CLOUD_URL_KEY = 'supabaseUrl';
 const CLOUD_ANON_KEY = 'supabaseAnonKey';
 let supabaseClient = null;
+let cropper = null;
 
 // ─────────────────────────────────────────
 //  INIT
@@ -860,6 +897,7 @@ function setUploadPreviewVisible(hasImage) {
   zone.classList.toggle('has-image', hasImage);
   document.getElementById('upload-placeholder').style.display = hasImage ? 'none' : '';
   document.getElementById('preview-wrap').style.display = hasImage ? 'block' : 'none';
+  document.getElementById('btn-crop').style.display = hasImage ? 'inline-flex' : 'none';
   zone.style.cursor = hasImage ? 'default' : 'pointer';
 }
 
@@ -955,6 +993,92 @@ function removeImage(e) {
   document.getElementById('preview-img').src = '';
   setUploadPreviewVisible(false);
   document.getElementById('file-input').value = '';
+}
+
+function destroyCropper() {
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+}
+
+function openCropModal() {
+  if (!state.currentImage) {
+    toast('Upload a photo first', 'error');
+    return;
+  }
+  if (!window.Cropper) {
+    toast('Cropper failed to load. Refresh and try again.', 'error');
+    return;
+  }
+  const modal = document.getElementById('crop-modal');
+  const img = document.getElementById('crop-image');
+  destroyCropper();
+  img.src = state.currentImage;
+  modal.classList.add('open');
+  img.onload = () => {
+    try {
+      cropper = new Cropper(img, {
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.9,
+        background: false,
+        responsive: true,
+        movable: true,
+        zoomable: true,
+        scalable: false,
+        rotatable: false,
+      });
+    } catch (err) {
+      console.error(err);
+      toast('Could not initialize crop tool', 'error');
+      closeCropModal();
+    }
+  };
+}
+
+function closeCropModal() {
+  document.getElementById('crop-modal').classList.remove('open');
+  destroyCropper();
+}
+
+function closeCropOnOverlay(e) {
+  if (e.target === document.getElementById('crop-modal')) closeCropModal();
+}
+
+function dataUrlFromCanvasSized(canvas) {
+  let quality = 0.92;
+  let out = canvas.toDataURL('image/jpeg', quality);
+  while (dataUrlByteLength(out) > MAX_STORED_IMAGE_BYTES && quality > 0.45) {
+    quality -= 0.08;
+    out = canvas.toDataURL('image/jpeg', quality);
+  }
+  return out;
+}
+
+function applyCrop() {
+  if (!cropper) {
+    toast('Crop tool is not ready yet', 'error');
+    return;
+  }
+  try {
+    const canvas = cropper.getCroppedCanvas({
+      maxWidth: 1600,
+      maxHeight: 1600,
+      imageSmoothingQuality: 'high',
+      fillColor: '#fff',
+    });
+    if (!canvas) throw new Error('Could not crop this image');
+    const cropped = dataUrlFromCanvasSized(canvas);
+    state.currentImage = cropped;
+    document.getElementById('preview-img').src = cropped;
+    setUploadPreviewVisible(true);
+    closeCropModal();
+    toast('Photo cropped', 'success');
+  } catch (err) {
+    console.error(err);
+    toast(`Crop failed: ${err.message}`, 'error');
+  }
 }
 
 // ─────────────────────────────────────────
